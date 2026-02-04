@@ -5,7 +5,7 @@ Provides REST endpoints for network log analysis and threat hunting.
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.config import settings
-from api.routers import analysis, logs
+from api.routers import analysis, logs, ingest, data
 
 
 # Initialize FastAPI app
@@ -46,6 +46,8 @@ app.include_router(logs.router, prefix=f"{settings.api_prefix}/logs", tags=["log
 app.include_router(
     analysis.router, prefix=f"{settings.api_prefix}/analysis", tags=["analysis"]
 )
+app.include_router(ingest.router, prefix=f"{settings.api_prefix}/ingest", tags=["ingest"])
+app.include_router(data.router, prefix=f"{settings.api_prefix}/data", tags=["data"])
 
 
 if __name__ == "__main__":

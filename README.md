@@ -7,6 +7,8 @@ Hunter is a network security analysis platform that processes Zeek and Suricata 
 ## Features
 
 - **Multi-Source Log Analysis**: Parse and correlate Zeek and Suricata network logs
+- **Beaconing Detection**: Identify C2 communication via periodic callback patterns
+- **DNS Threat Analysis**: Detect DNS tunneling, DGA domains, and fast-flux networks
 - **Threat Scoring**: AI-powered threat scoring with detailed explanations
 - **MITRE ATT&CK Mapping**: Automatic mapping of threats to ATT&CK techniques and tactics
 - **Interactive Dashboards**: Real-time visualizations with dark NOC-style UI
@@ -185,6 +187,21 @@ make fixtures   # Regenerate fixture data
 - `POST /api/v1/analysis/hunt` - Execute threat hunt
 - `GET /api/v1/analysis/hunt/{hunt_id}` - Get hunt results
 
+### Beaconing Detection
+
+- `GET /api/v1/hunt/beacons` - Detect C2 beaconing patterns
+- `GET /api/v1/hunt/beacons/{src_ip}/{dst_ip}` - Get detailed beacon analysis
+- `GET /api/v1/hunt/beacons/stats` - Get beacon statistics
+
+### DNS Threat Detection
+
+- `GET /api/v1/hunt/dns/threats` - Get comprehensive DNS threat summary
+- `GET /api/v1/hunt/dns/tunneling` - Detect DNS tunneling
+- `GET /api/v1/hunt/dns/dga` - Detect DGA domains
+- `GET /api/v1/hunt/dns/fast-flux` - Detect fast-flux DNS
+- `GET /api/v1/hunt/dns/suspicious-patterns` - Detect suspicious DNS patterns
+- `GET /api/v1/hunt/dns/stats` - Get DNS threat statistics
+
 ## Development Workflow
 
 ### Running Tests
@@ -267,6 +284,13 @@ Hunter uses a Watchtower NOC-inspired dark theme:
 - **Accent Red**: `#ef4444` - Critical threats
 - **Accent Amber**: `#f59e0b` - Warnings
 - **Accent Green**: `#22c55e` - Success/safe
+
+## Documentation
+
+- [Beaconing Detection Guide](BEACON_DETECTION.md) - C2 communication pattern analysis
+- [DNS Threat Detection Guide](DNS_THREAT_DETECTION.md) - DNS tunneling, DGA, and fast-flux detection
+- [Log Ingestion Guide](LOG_INGESTION_README.md) - Parsing Zeek and Suricata logs
+- [Implementation Summary](IMPLEMENTATION_SUMMARY.md) - Architecture and design decisions
 
 ## Contributing
 

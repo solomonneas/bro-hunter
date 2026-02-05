@@ -1,21 +1,48 @@
 """
 Threat hunting endpoints for beacon detection and analysis.
 """
-from fastapi import APIRouter, HTTPException, Query
-from typing import Optional
+from fastapi import APIRouter, HTTPException, Query, Depends
+from typing import Optional, Annotated
 import logging
+import ipaddress
 
 from api.services.log_store import log_store
 from api.services.beacon_analyzer import BeaconAnalyzer
 from api.models.beacon import BeaconResult, BeaconDetailedResult
+from api.dependencies.auth import api_key_auth
 
 logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
 
+def _validate_ip(ip: str, param_name: str) -> str:
+    """
+    Validate IP address format.
+
+    Args:
+        ip: IP address string
+        param_name: Parameter name for error message
+
+    Returns:
+        Validated IP address string
+
+    Raises:
+        HTTPException: 422 if IP format is invalid
+    """
+    try:
+        ipaddress.ip_address(ip)
+        return ip
+    except ValueError:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Invalid IP address format for {param_name}: {ip}",
+        )
+
+
 @router.get("/beacons", response_model=dict)
 async def get_beacons(
+    _: Annotated[str, Depends(api_key_auth)],
     min_score: float = Query(70.0, description="Minimum beacon score", ge=0.0, le=100.0),
     min_connections: int = Query(10, description="Minimum connection count", ge=3),
     max_jitter_pct: float = Query(20.0, description="Maximum jitter percentage", ge=0.0),
@@ -94,6 +121,7 @@ async def get_beacons(
 async def get_beacon_detail(
     src_ip: str,
     dst_ip: str,
+    _: Annotated[str, Depends(api_key_auth)],
     min_connections: int = Query(10, description="Minimum connection count", ge=3),
 ) -> dict:
     """
@@ -105,6 +133,10 @@ async def get_beacon_detail(
     - Data size distributions
     - Statistical metrics and confidence scores
     """
+    # Validate IP address formats
+    _validate_ip(src_ip, "src_ip")
+    _validate_ip(dst_ip, "dst_ip")
+
     if not log_store.connections:
         raise HTTPException(
             status_code=400,
@@ -148,6 +180,7 @@ async def get_beacon_detail(
 
 @router.get("/beacons/stats", response_model=dict)
 async def get_beacon_stats(
+    _: Annotated[str, Depends(api_key_auth)],
     min_score: float = Query(70.0, description="Minimum beacon score", ge=0.0, le=100.0),
 ) -> dict:
     """

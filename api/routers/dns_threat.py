@@ -1,12 +1,13 @@
 """
 DNS threat detection endpoints for tunneling, DGA, and suspicious patterns.
 """
-from fastapi import APIRouter, HTTPException, Query
-from typing import Optional
+from fastapi import APIRouter, HTTPException, Query, Depends
+from typing import Optional, Annotated
 import logging
 
 from api.services.log_store import log_store
 from api.services.dns_analyzer import DnsAnalyzer
+from api.dependencies.auth import api_key_auth
 from api.models.dns_threat import (
     DnsThreatSummary,
     DnsTunnelingResult,
@@ -22,6 +23,7 @@ router = APIRouter()
 
 @router.get("/dns/threats", response_model=dict)
 async def get_dns_threats(
+    _: Annotated[str, Depends(api_key_auth)],
     tunneling_threshold: float = Query(60.0, description="Minimum tunneling score", ge=0.0, le=100.0),
     dga_threshold: float = Query(65.0, description="Minimum DGA score", ge=0.0, le=100.0),
     fast_flux_threshold: float = Query(70.0, description="Minimum fast-flux score", ge=0.0, le=100.0),
@@ -86,10 +88,11 @@ async def get_dns_threats(
 
 @router.get("/dns/tunneling", response_model=dict)
 async def get_dns_tunneling(
+    _: Annotated[str, Depends(api_key_auth)],
     min_score: float = Query(60.0, description="Minimum tunneling score", ge=0.0, le=100.0),
     min_queries: int = Query(10, description="Minimum query count", ge=3),
     limit: int = Query(100, description="Maximum results to return", ge=1, le=1000),
-    offset: int = Query(0, description="Results offset for pagination", ge=0),
+    offset: int = Query(0, description="Results offset for pagination", ge=0, le=100000),
 ) -> dict:
     """
     Detect DNS tunneling patterns.
@@ -149,10 +152,11 @@ async def get_dns_tunneling(
 
 @router.get("/dns/dga", response_model=dict)
 async def get_dga_domains(
+    _: Annotated[str, Depends(api_key_auth)],
     min_score: float = Query(65.0, description="Minimum DGA score", ge=0.0, le=100.0),
     min_queries: int = Query(3, description="Minimum query count", ge=1),
     limit: int = Query(100, description="Maximum results to return", ge=1, le=1000),
-    offset: int = Query(0, description="Results offset for pagination", ge=0),
+    offset: int = Query(0, description="Results offset for pagination", ge=0, le=100000),
 ) -> dict:
     """
     Detect DGA (Domain Generation Algorithm) domains.
@@ -213,10 +217,11 @@ async def get_dga_domains(
 
 @router.get("/dns/fast-flux", response_model=dict)
 async def get_fast_flux(
+    _: Annotated[str, Depends(api_key_auth)],
     min_score: float = Query(70.0, description="Minimum fast-flux score", ge=0.0, le=100.0),
     min_queries: int = Query(5, description="Minimum query count", ge=3),
     limit: int = Query(100, description="Maximum results to return", ge=1, le=1000),
-    offset: int = Query(0, description="Results offset for pagination", ge=0),
+    offset: int = Query(0, description="Results offset for pagination", ge=0, le=100000),
 ) -> dict:
     """
     Detect fast-flux DNS patterns.
@@ -275,13 +280,14 @@ async def get_fast_flux(
 
 @router.get("/dns/suspicious-patterns", response_model=dict)
 async def get_suspicious_patterns(
+    _: Annotated[str, Depends(api_key_auth)],
     min_score: float = Query(60.0, description="Minimum suspicion score", ge=0.0, le=100.0),
     pattern_type: Optional[str] = Query(
         None,
         description="Filter by pattern type (excessive_nxdomain, unusual_query_types, high_query_rate)"
     ),
     limit: int = Query(100, description="Maximum results to return", ge=1, le=1000),
-    offset: int = Query(0, description="Results offset for pagination", ge=0),
+    offset: int = Query(0, description="Results offset for pagination", ge=0, le=100000),
 ) -> dict:
     """
     Detect other suspicious DNS patterns.
@@ -339,7 +345,9 @@ async def get_suspicious_patterns(
 
 
 @router.get("/dns/stats", response_model=dict)
-async def get_dns_threat_stats() -> dict:
+async def get_dns_threat_stats(
+    _: Annotated[str, Depends(api_key_auth)],
+) -> dict:
     """
     Get summary statistics about DNS threats.
 

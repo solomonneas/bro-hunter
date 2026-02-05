@@ -2,15 +2,16 @@
 Data router for querying loaded network logs.
 Provides endpoints for connections, DNS queries, alerts, and summaries.
 """
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, Query, HTTPException, status, Depends
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Annotated
 from datetime import datetime
 from collections import Counter
 import logging
 
 from api.services.log_store import log_store
 from api.parsers.unified import Connection, DnsQuery, Alert
+from api.dependencies.auth import api_key_auth
 
 logger = logging.getLogger(__name__)
 
@@ -46,14 +47,15 @@ class SummaryResponse(BaseModel):
     description="Query network connections with optional filters and pagination",
 )
 async def get_connections(
+    _: Annotated[str, Depends(api_key_auth)],
     src_ip: Optional[str] = Query(None, description="Filter by source IP address"),
     dst_ip: Optional[str] = Query(None, description="Filter by destination IP address"),
-    port: Optional[int] = Query(None, description="Filter by source or destination port"),
+    port: Optional[int] = Query(None, ge=1, le=65535, description="Filter by source or destination port"),
     proto: Optional[str] = Query(None, description="Filter by protocol (tcp/udp/icmp)"),
     service: Optional[str] = Query(None, description="Filter by detected service"),
-    min_duration: Optional[float] = Query(None, description="Filter by minimum duration (seconds)"),
+    min_duration: Optional[float] = Query(None, ge=0, description="Filter by minimum duration (seconds)"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum results per page"),
-    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    offset: int = Query(0, ge=0, le=100000, description="Number of results to skip"),
 ) -> ConnectionsResponse:
     """
     Get network connections with optional filters.
@@ -125,7 +127,9 @@ async def get_connections(
     summary="Get data summary",
     description="Get summary statistics for all loaded network data",
 )
-async def get_summary() -> SummaryResponse:
+async def get_summary(
+    _: Annotated[str, Depends(api_key_auth)],
+) -> SummaryResponse:
     """
     Get summary statistics for loaded data.
 
@@ -196,11 +200,12 @@ async def get_summary() -> SummaryResponse:
     description="Query DNS queries with optional filters",
 )
 async def get_dns_queries(
+    _: Annotated[str, Depends(api_key_auth)],
     src_ip: Optional[str] = Query(None, description="Filter by source IP address"),
     query: Optional[str] = Query(None, description="Filter by domain name (substring)"),
     qtype: Optional[str] = Query(None, description="Filter by query type (A, AAAA, etc.)"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum results per page"),
-    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    offset: int = Query(0, ge=0, le=100000, description="Number of results to skip"),
 ) -> dict:
     """
     Get DNS queries with optional filters.
@@ -254,10 +259,11 @@ async def get_dns_queries(
     description="Query Suricata IDS alerts with optional filters",
 )
 async def get_alerts(
+    _: Annotated[str, Depends(api_key_auth)],
     severity: Optional[int] = Query(None, ge=1, le=3, description="Filter by severity (1=high, 3=low)"),
     category: Optional[str] = Query(None, description="Filter by alert category"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum results per page"),
-    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    offset: int = Query(0, ge=0, le=100000, description="Number of results to skip"),
 ) -> dict:
     """
     Get IDS alerts with optional filters.
@@ -308,6 +314,7 @@ async def get_alerts(
     description="Get connection timeline for visualization",
 )
 async def get_timeline(
+    _: Annotated[str, Depends(api_key_auth)],
     interval: str = Query("hour", description="Time interval (hour, day)"),
     limit: int = Query(100, ge=1, le=500, description="Maximum data points"),
 ) -> dict:

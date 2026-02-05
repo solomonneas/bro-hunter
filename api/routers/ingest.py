@@ -1,13 +1,17 @@
 """
-Ingest router for loading log files into Hunter.
+Ingest router for loading log files into Bro Hunter.
 Provides endpoints for loading directories of Zeek and Suricata logs.
 """
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Depends
 from pydantic import BaseModel, Field
-from typing import Optional
+from pathlib import Path
+from typing import Optional, Annotated
 import logging
+import os
 
 from api.services.log_store import log_store
+from api.dependencies.auth import api_key_auth
+from api.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -43,13 +47,55 @@ class IngestStats(BaseModel):
     alerts: int = Field(..., description="Number of alerts loaded")
 
 
+def _validate_path(path: str) -> Path:
+    """
+    Validate and normalize path to prevent directory traversal attacks.
+
+    Args:
+        path: User-provided path string
+
+    Returns:
+        Normalized Path object
+
+    Raises:
+        HTTPException: If path is outside allowed root or is a symlink
+    """
+    # Resolve to absolute path, following symlinks
+    resolved = Path(path).resolve()
+
+    # Check if it's a symlink (security: could point outside allowed root)
+    if Path(path).is_symlink():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Symbolic links are not allowed for security reasons",
+        )
+
+    # If log root is configured, enforce it
+    if settings.log_root:
+        log_root = Path(settings.log_root).resolve()
+
+        # Ensure path is within allowed root
+        try:
+            resolved.relative_to(log_root)
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail=f"Access denied: path must be within {log_root}",
+            )
+
+    return resolved
+
+
 @router.post(
     "/directory",
     response_model=IngestDirectoryResponse,
     summary="Ingest log directory",
     description="Load all Zeek and Suricata log files from a directory into memory for analysis",
 )
-async def ingest_directory(request: IngestDirectoryRequest) -> IngestDirectoryResponse:
+async def ingest_directory(
+    request: IngestDirectoryRequest,
+    _: Annotated[str, Depends(api_key_auth)],
+) -> IngestDirectoryResponse:
     """
     Load log files from a directory.
 
@@ -69,10 +115,12 @@ async def ingest_directory(request: IngestDirectoryRequest) -> IngestDirectoryRe
         HTTPException: If directory not found or ingestion fails
     """
     try:
-        logger.info(f"Starting directory ingestion: {request.path}")
+        # Validate path to prevent traversal attacks
+        validated_path = _validate_path(request.path)
+        logger.info(f"Starting directory ingestion: {validated_path}")
 
         # Load directory
-        stats = log_store.load_directory(request.path)
+        stats = log_store.load_directory(str(validated_path))
 
         logger.info(f"Ingestion complete: {stats}")
 
@@ -109,7 +157,9 @@ async def ingest_directory(request: IngestDirectoryRequest) -> IngestDirectoryRe
     summary="Clear log store",
     description="Clear all loaded logs from memory",
 )
-async def clear_logs() -> dict:
+async def clear_logs(
+    _: Annotated[str, Depends(api_key_auth)],
+) -> dict:
     """
     Clear all loaded logs from the in-memory store.
 
@@ -138,7 +188,9 @@ async def clear_logs() -> dict:
     summary="Get ingestion status",
     description="Get current status of the log store (loaded data summary)",
 )
-async def get_status() -> dict:
+async def get_status(
+    _: Annotated[str, Depends(api_key_auth)],
+) -> dict:
     """
     Get current log store status.
 

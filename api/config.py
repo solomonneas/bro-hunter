@@ -10,9 +10,15 @@ class Settings(BaseSettings):
     """Application settings and configuration."""
 
     # API Configuration
-    app_name: str = "Hunter - Network Threat Hunting Platform"
-    app_version: str = "0.1.0"
+    app_name: str = "Bro Hunter - Network Threat Hunting Platform"
+    app_version: str = "0.2.0"
     api_prefix: str = "/api/v1"
+
+    # Security Configuration
+    api_key: str | None = None  # Set via BROHUNTER_API_KEY
+
+    # Log ingestion security
+    log_root: str | None = None  # Set via BROHUNTER_LOG_ROOT - restrict ingestion to this directory
 
     # CORS Configuration
     cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]
@@ -32,7 +38,7 @@ class Settings(BaseSettings):
     dns_query_threshold: int = 100  # Excessive DNS queries per host
 
     class Config:
-        env_prefix = "HUNTER_"
+        env_prefix = "BROHUNTER_"
         case_sensitive = False
 
 

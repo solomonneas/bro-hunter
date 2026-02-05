@@ -6,7 +6,7 @@ function App() {
       <header className="border-b border-surface">
         <div className="container mx-auto px-4 py-4">
           <h1 className="text-2xl font-bold text-accent-cyan">
-            Hunter - Network Threat Hunting Platform
+            Bro Hunter - Network Threat Hunting Platform
           </h1>
         </div>
       </header>
@@ -15,7 +15,7 @@ function App() {
         <div className="grid gap-6">
           <div className="p-6 rounded-lg bg-surface border border-accent-cyan/20">
             <h2 className="text-xl font-semibold text-accent-cyan mb-4">
-              Welcome to Hunter
+              Welcome to Bro Hunter
             </h2>
             <p className="text-gray-300 mb-4">
               Network threat hunting and analysis platform for Zeek and Suricata logs.

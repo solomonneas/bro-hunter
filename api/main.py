@@ -1,5 +1,5 @@
 """
-Hunter API - FastAPI application entry point.
+Bro Hunter API - FastAPI application entry point.
 Provides REST endpoints for network log analysis and threat hunting.
 """
 from fastapi import FastAPI
@@ -12,7 +12,7 @@ from api.routers import analysis, logs, ingest, data, hunt, dns_threat
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
-    description="Network threat hunting and analysis platform for Zeek and Suricata logs",
+    description="Network threat hunting and analysis platform for Zeek (Bro) and Suricata logs",
 )
 
 # Configure CORS

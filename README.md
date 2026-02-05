@@ -1,8 +1,8 @@
-# Hunter - Network Threat Hunting Platform
+# Bro Hunter - Network Threat Hunting Platform
 
 **Hunt threats in network traffic with explainable AI-powered analysis.**
 
-Hunter is a network security analysis platform that processes Zeek and Suricata logs to identify threats, map them to MITRE ATT&CK techniques, and provide actionable intelligence with full explainability.
+Bro Hunter is a network security analysis platform that processes Zeek (formerly "Bro") and Suricata logs to identify threats, map them to MITRE ATT&CK techniques, and provide actionable intelligence with full explainability.
 
 ## Features
 
@@ -19,7 +19,7 @@ Hunter is a network security analysis platform that processes Zeek and Suricata 
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                        HUNTER PLATFORM                       │
+│                      BRO HUNTER PLATFORM                     │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
 │  ┌──────────────┐         ┌──────────────┐                 │
@@ -264,11 +264,13 @@ cd web && npm test
 
 ### Backend Configuration
 
-Environment variables (prefix with `HUNTER_`):
+Environment variables (prefix with `BROHUNTER_`):
 
-- `HUNTER_MAX_FILE_SIZE`: Maximum upload size (default: 100MB)
-- `HUNTER_HIGH_THREAT_THRESHOLD`: High threat score threshold (default: 0.75)
-- `HUNTER_MEDIUM_THREAT_THRESHOLD`: Medium threat threshold (default: 0.50)
+- `BROHUNTER_API_KEY`: **Required for production** - API key for authentication
+- `BROHUNTER_LOG_ROOT`: **Recommended** - Restrict log ingestion to this directory
+- `BROHUNTER_MAX_FILE_SIZE`: Maximum upload size (default: 100MB)
+- `BROHUNTER_HIGH_THREAT_THRESHOLD`: High threat score threshold (default: 0.75)
+- `BROHUNTER_MEDIUM_THREAT_THRESHOLD`: Medium threat threshold (default: 0.50)
 
 ### Frontend Configuration
 
@@ -276,7 +278,7 @@ Vite proxy configuration in `web/vite.config.ts` proxies `/api` requests to the 
 
 ## Dark Theme Colors
 
-Hunter uses a Watchtower NOC-inspired dark theme:
+Bro Hunter uses a Watchtower NOC-inspired dark theme:
 
 - **Background**: `#0a0e17` - Deep navy black
 - **Surface**: `#111827` - Dark slate

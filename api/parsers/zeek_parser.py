@@ -6,7 +6,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Iterator, Union, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
 from api.models.zeek import (
     ConnLog,
@@ -47,15 +47,25 @@ class ZeekParser:
     @staticmethod
     def parse_timestamp(ts: float) -> datetime:
         """
-        Convert Zeek epoch timestamp to datetime object.
+        Convert Zeek epoch timestamp to UTC-aware datetime object.
 
         Args:
             ts: Zeek timestamp (float epoch seconds with microsecond precision)
 
         Returns:
-            datetime object in UTC
+            UTC-aware datetime object
+
+        Raises:
+            ValueError: If timestamp is invalid
         """
-        return datetime.utcfromtimestamp(ts)
+        if ts is None:
+            raise ValueError("Timestamp cannot be None")
+        if not isinstance(ts, (int, float)):
+            raise ValueError(f"Timestamp must be numeric, got {type(ts)}")
+        # Sanity check: timestamps should be reasonable (after 2000, before 2100)
+        if ts < 946684800 or ts > 4102444800:
+            raise ValueError(f"Timestamp {ts} out of valid range")
+        return datetime.fromtimestamp(ts, tz=timezone.utc)
 
     @staticmethod
     def detect_log_type(filename: str) -> str:

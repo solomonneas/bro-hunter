@@ -2,16 +2,21 @@
 Log ingestion and retrieval endpoints.
 Handles uploading and querying Zeek and Suricata logs.
 """
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from typing import List
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from typing import List, Annotated
+
+from api.dependencies.auth import api_key_auth
 
 router = APIRouter()
 
 
 @router.post("/upload/zeek")
-async def upload_zeek_logs(file: UploadFile = File(...)):
+async def upload_zeek_logs(
+    _: Annotated[str, Depends(api_key_auth)],
+    file: UploadFile = File(...),
+):
     """Upload Zeek JSON log file for analysis."""
-    if not file.filename.endswith((".json", ".log")):
+    if not file.filename or not file.filename.endswith((".json", ".log")):
         raise HTTPException(status_code=400, detail="Only JSON/log files supported")
 
     return {
@@ -22,9 +27,12 @@ async def upload_zeek_logs(file: UploadFile = File(...)):
 
 
 @router.post("/upload/suricata")
-async def upload_suricata_logs(file: UploadFile = File(...)):
+async def upload_suricata_logs(
+    _: Annotated[str, Depends(api_key_auth)],
+    file: UploadFile = File(...),
+):
     """Upload Suricata eve.json file for analysis."""
-    if not file.filename.endswith(".json"):
+    if not file.filename or not file.filename.endswith(".json"):
         raise HTTPException(status_code=400, detail="Only JSON files supported")
 
     return {
@@ -35,7 +43,9 @@ async def upload_suricata_logs(file: UploadFile = File(...)):
 
 
 @router.get("/stats")
-async def get_log_stats():
+async def get_log_stats(
+    _: Annotated[str, Depends(api_key_auth)],
+):
     """Get statistics about ingested logs."""
     return {
         "zeek_logs": {"count": 0, "types": []},

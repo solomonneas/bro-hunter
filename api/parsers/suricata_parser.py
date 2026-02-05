@@ -6,7 +6,7 @@ import json
 import logging
 from pathlib import Path
 from typing import Iterator, Union, Any
-from datetime import datetime
+from datetime import datetime, timezone
 
 from api.models.suricata import (
     SuricataAlert,
@@ -38,14 +38,20 @@ class SuricataParser:
     @staticmethod
     def parse_timestamp(timestamp_str: str) -> datetime:
         """
-        Convert Suricata ISO 8601 timestamp to datetime object.
+        Convert Suricata ISO 8601 timestamp to UTC-aware datetime object.
 
         Args:
             timestamp_str: ISO 8601 timestamp string
 
         Returns:
-            datetime object in UTC
+            UTC-aware datetime object
+
+        Raises:
+            ValueError: If timestamp format is invalid or unparseable
         """
+        if not timestamp_str:
+            raise ValueError("Timestamp string cannot be empty")
+
         # Handle various ISO formats
         formats = [
             "%Y-%m-%dT%H:%M:%S.%f%z",
@@ -56,17 +62,25 @@ class SuricataParser:
 
         for fmt in formats:
             try:
-                return datetime.strptime(timestamp_str, fmt)
+                dt = datetime.strptime(timestamp_str, fmt)
+                # Ensure UTC awareness
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                return dt
             except ValueError:
                 continue
 
         # Fallback: try dateutil parser if available
         try:
             from dateutil import parser as dateutil_parser
-            return dateutil_parser.parse(timestamp_str)
-        except Exception:
-            logger.warning(f"Failed to parse timestamp: {timestamp_str}")
-            return datetime.utcnow()
+            dt = dateutil_parser.parse(timestamp_str)
+            # Ensure UTC awareness
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return dt
+        except Exception as e:
+            # Don't fallback to current time - raise error for invalid data
+            raise ValueError(f"Failed to parse timestamp '{timestamp_str}': {e}")
 
     @staticmethod
     def parse_file(

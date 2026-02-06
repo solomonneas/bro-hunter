@@ -464,3 +464,213 @@ export interface MitreResponse {
   mappings: MitreMapping[];
   total: number;
 }
+
+// ============================================================================
+// Frontend-Specific Types (Beacon, DNS Threats, Charts, UI State)
+// ============================================================================
+
+/**
+ * Frontend representation of beacon detection results.
+ * Mirrors backend BeaconResult but optimized for UI consumption.
+ */
+export interface BeaconResult {
+  id: string;
+  src_ip: string;
+  dst_ip: string;
+  dst_port: number;
+  proto: string;
+  connection_count: number;
+  time_span_seconds: number;
+  avg_interval_seconds: number;
+  median_interval_seconds: number;
+  min_interval_seconds: number;
+  max_interval_seconds: number;
+  interval_std_dev: number;
+  jitter_pct: number;
+  data_size_avg: number | null;
+  data_size_variance: number | null;
+  beacon_score: number;
+  confidence: number;
+  reasons: string[];
+  mitre_techniques: string[];
+  first_seen: number;
+  last_seen: number;
+}
+
+/**
+ * Extended beacon result with histogram / detailed interval data.
+ */
+export interface BeaconDetailedResult extends BeaconResult {
+  interval_histogram: {
+    bin_edges: number[];
+    bin_counts: number[];
+    bin_centers: number[];
+  };
+  all_intervals: number[];
+  all_timestamps: number[];
+  all_data_sizes: number[];
+}
+
+/**
+ * Unified DNS threat result encompassing tunneling, DGA, fast-flux, etc.
+ */
+export interface DnsThreatResult {
+  id: string;
+  threat_type: 'tunneling' | 'dga' | 'fast_flux' | 'suspicious_pattern';
+  domain: string;
+  src_ip: string;
+  query_count: number;
+  score: number;
+  confidence: number;
+  reasons: string[];
+  mitre_techniques: string[];
+  first_seen: number;
+  last_seen: number;
+  /** Tunneling-specific */
+  unique_subdomains?: number;
+  avg_subdomain_entropy?: number;
+  estimated_bytes_exfiltrated?: number;
+  /** DGA-specific */
+  domain_entropy?: number;
+  consonant_ratio?: number;
+  nxdomain_count?: number;
+  /** Fast-flux-specific */
+  unique_ips?: number;
+  ip_changes_per_hour?: number;
+  avg_ttl?: number;
+}
+
+/**
+ * Single point on a threat timeline chart.
+ */
+export interface ThreatTimelinePoint {
+  timestamp: string;
+  total: number;
+  critical: number;
+  high: number;
+  medium: number;
+  low: number;
+  info: number;
+}
+
+/**
+ * Severity distribution for donut/pie charts.
+ */
+export interface ThreatSeverityDistribution {
+  severity: ThreatLevel;
+  count: number;
+  percentage: number;
+}
+
+/**
+ * Model score comparison for multi-model analysis views.
+ */
+export interface ModelScoreComparison {
+  entity: string;
+  entity_type: string;
+  scores: Record<string, number>;
+  consensus_score: number;
+  variance: number;
+}
+
+/**
+ * Theme configuration for chart components.
+ * Each variant supplies its own ChartTheme.
+ */
+export interface ChartTheme {
+  colors: {
+    primary: string;
+    secondary: string;
+    accent: string;
+    danger: string;
+    warning: string;
+    success: string;
+    info: string;
+    background: string;
+    surface: string;
+    text: string;
+    textSecondary: string;
+    gridLine: string;
+    series: string[];
+  };
+  fonts: {
+    family: string;
+    monoFamily: string;
+    sizeSmall: number;
+    sizeBase: number;
+    sizeLarge: number;
+  };
+  spacing: {
+    chartPadding: number;
+    legendGap: number;
+    tooltipPadding: number;
+  };
+}
+
+/**
+ * Per-variant theme wrapper. Contains chart theme plus UI-level overrides.
+ */
+export interface VariantTheme {
+  id: number;
+  name: string;
+  description: string;
+  chart: ChartTheme;
+  ui: {
+    borderRadius: string;
+    cardBg: string;
+    headerBg: string;
+    accentGradient?: string;
+  };
+}
+
+/**
+ * Aggregate dashboard statistics.
+ */
+export interface DashboardStats {
+  totalAlerts: number;
+  criticalAlerts: number;
+  highAlerts: number;
+  mediumAlerts: number;
+  lowAlerts: number;
+  infoAlerts: number;
+  totalBeacons: number;
+  totalDnsThreats: number;
+  uniqueSourceIPs: number;
+  uniqueDestIPs: number;
+  topMitreTechniques: { technique: string; count: number }[];
+  averageThreatScore: number;
+  alertsTrend: number;
+  lastUpdated: string;
+}
+
+/**
+ * Generic filter state for data views.
+ */
+export interface FilterState {
+  search: string;
+  severity: ThreatLevel[];
+  dateRange: { start: string | null; end: string | null };
+  sourceIPs: string[];
+  destIPs: string[];
+  mitreTechniques: string[];
+  minScore: number;
+  maxScore: number;
+}
+
+/**
+ * Sort configuration for data tables.
+ */
+export interface SortConfig {
+  key: string;
+  direction: 'asc' | 'desc';
+}
+
+/**
+ * Pagination state for data tables.
+ */
+export interface PaginationState {
+  page: number;
+  pageSize: number;
+  totalItems: number;
+  totalPages: number;
+}

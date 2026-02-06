@@ -1,48 +1,42 @@
+/**
+ * Root App component with React Router.
+ * / = VariantPicker, /1/* through /5/* = variant apps.
+ */
+import React, { lazy, Suspense } from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import VariantPicker from './pages/VariantPicker';
+
+// Lazy-load variant apps for code splitting
+const V1App = lazy(() => import('./variants/v1/App'));
+const V2App = lazy(() => import('./variants/v2/App'));
+const V3App = lazy(() => import('./variants/v3/App'));
+const V4App = lazy(() => import('./variants/v4/App'));
+const V5App = lazy(() => import('./variants/v5/App'));
+
+const LoadingFallback: React.FC = () => (
+  <div className="min-h-screen bg-background flex items-center justify-center">
+    <div className="text-center">
+      <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+      <p className="text-sm text-gray-500">Loading variant…</p>
+    </div>
+  </div>
+);
+
 function App() {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-surface">
-        <div className="container mx-auto px-4 py-4">
-          <h1 className="text-2xl font-bold text-accent-cyan">
-            Bro Hunter - Network Threat Hunting Platform
-          </h1>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-8">
-        <div className="grid gap-6">
-          <div className="p-6 rounded-lg bg-surface border border-accent-cyan/20">
-            <h2 className="text-xl font-semibold text-accent-cyan mb-4">
-              Welcome to Bro Hunter
-            </h2>
-            <p className="text-gray-300 mb-4">
-              Network threat hunting and analysis platform for Zeek and Suricata logs.
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="p-4 rounded bg-background border border-accent-amber/30">
-                <h3 className="text-accent-amber font-semibold mb-2">Log Analysis</h3>
-                <p className="text-sm text-gray-400">
-                  Parse and analyze Zeek and Suricata network logs
-                </p>
-              </div>
-              <div className="p-4 rounded bg-background border border-accent-red/30">
-                <h3 className="text-accent-red font-semibold mb-2">Threat Hunting</h3>
-                <p className="text-sm text-gray-400">
-                  Execute threat hunting queries with MITRE ATT&CK mapping
-                </p>
-              </div>
-              <div className="p-4 rounded bg-background border border-accent-green/30">
-                <h3 className="text-accent-green font-semibold mb-2">Visualization</h3>
-                <p className="text-sm text-gray-400">
-                  Interactive charts and timelines for network events
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-    </div>
-  )
+    <BrowserRouter>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          <Route path="/" element={<VariantPicker />} />
+          <Route path="/1/*" element={<V1App />} />
+          <Route path="/2/*" element={<V2App />} />
+          <Route path="/3/*" element={<V3App />} />
+          <Route path="/4/*" element={<V4App />} />
+          <Route path="/5/*" element={<V5App />} />
+        </Routes>
+      </Suspense>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

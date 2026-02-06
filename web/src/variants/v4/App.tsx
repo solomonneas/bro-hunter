@@ -1,26 +1,126 @@
 /**
- * Variant 4: Beacon Analyzer
- * Specialized view for C2 beacon detection with scatter plots and histograms.
- * TODO: Implement full variant layout.
+ * Variant 4: Cyberpunk / Neon Threat Map
+ * Blade Runner meets Tron — aggressive neon, angular edges, glowing everything.
+ * Full-width angular nav with clip-path, neon glow accents.
  */
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Zap, ArrowLeft } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, NavLink, Navigate, Link, useLocation } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Network,
+  Radio,
+  Shield,
+  Search,
+  Globe,
+  ArrowLeft,
+  Zap,
+  AlertTriangle,
+} from 'lucide-react';
+import { format } from 'date-fns';
+import { mockDashboardStats } from '../../data/mockData';
+import Dashboard from './pages/Dashboard';
+import Connections from './pages/Connections';
+import Beacons from './pages/Beacons';
+import DnsThreats from './pages/DnsThreats';
+import Threats from './pages/Threats';
+import HuntResults from './pages/HuntResults';
+import './styles.css';
+
+const NAV_ITEMS = [
+  { to: '/4', icon: LayoutDashboard, label: 'Dashboard', end: true },
+  { to: '/4/connections', icon: Network, label: 'Connections', end: false },
+  { to: '/4/beacons', icon: Radio, label: 'Beacons', end: false },
+  { to: '/4/dns', icon: Globe, label: 'DNS Intel', end: false },
+  { to: '/4/threats', icon: Shield, label: 'Threats', end: false },
+  { to: '/4/hunts', icon: Search, label: 'Hunt Ops', end: false },
+];
+
+const NeonClock: React.FC = () => {
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <span className="v4-nav-clock">
+      {format(now, 'HH:mm:ss')}
+    </span>
+  );
+};
 
 const V4App: React.FC = () => {
+  const critCount = mockDashboardStats.criticalAlerts;
+
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-red-500/20 bg-surface/80 px-4 py-3 flex items-center gap-3">
-        <Link to="/" className="text-gray-500 hover:text-gray-300 transition-colors">
-          <ArrowLeft size={18} />
+    <div className="v4-root">
+      {/* Angular Top Nav */}
+      <nav className="v4-nav">
+        <Link to="/4" className="v4-nav-brand">
+          <Zap size={20} />
+          <span className="v4-nav-brand-text">Bro Hunter</span>
         </Link>
-        <Zap size={20} className="text-red-400" />
-        <h1 className="text-lg font-semibold text-red-400">V4 — Beacon Analyzer</h1>
-      </header>
-      <main className="p-6">
-        <div className="rounded-lg border border-red-500/20 bg-surface/30 p-8 text-center">
-          <p className="text-gray-400">Variant 4 shell — implementation pending.</p>
+
+        <div className="v4-nav-items">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                `v4-nav-link${isActive ? ' active' : ''}`
+              }
+            >
+              <item.icon size={14} />
+              {item.label}
+            </NavLink>
+          ))}
         </div>
+
+        <div className="v4-nav-right">
+          <NeonClock />
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '4px 12px',
+              fontFamily: "'Orbitron', sans-serif",
+              fontSize: 10,
+              fontWeight: 700,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase' as const,
+              color: critCount > 0 ? '#FF00FF' : '#39FF14',
+              textShadow: critCount > 0
+                ? '0 0 10px rgba(255, 0, 255, 0.6)'
+                : '0 0 10px rgba(57, 255, 20, 0.6)',
+              background: critCount > 0
+                ? 'rgba(255, 0, 255, 0.1)'
+                : 'rgba(57, 255, 20, 0.1)',
+              border: `1px solid ${critCount > 0 ? 'rgba(255, 0, 255, 0.3)' : 'rgba(57, 255, 20, 0.3)'}`,
+              clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
+            }}
+          >
+            <AlertTriangle size={12} />
+            {critCount} CRITICAL
+          </div>
+          <Link to="/" className="v4-nav-back">
+            <ArrowLeft size={12} />
+            EXIT
+          </Link>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="v4-content">
+        <Routes>
+          <Route index element={<Dashboard />} />
+          <Route path="connections" element={<Connections />} />
+          <Route path="beacons" element={<Beacons />} />
+          <Route path="dns" element={<DnsThreats />} />
+          <Route path="threats" element={<Threats />} />
+          <Route path="hunts" element={<HuntResults />} />
+          <Route path="*" element={<Navigate to="/4" replace />} />
+        </Routes>
       </main>
     </div>
   );

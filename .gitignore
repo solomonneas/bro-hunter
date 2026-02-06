@@ -67,3 +67,14 @@ node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Real network data (private)
+data/suricata/
+data/zeek/
+data/README.md
+analyze_local.py
+*.json
+eve-*.json
+
+FRONTEND_DESIGN.md
+POLISH_NOTES.md

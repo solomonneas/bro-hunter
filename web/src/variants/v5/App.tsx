@@ -1,26 +1,79 @@
 /**
- * Variant 5: DNS Intelligence
- * DNS-centric threat view with tunneling, DGA, fast-flux, and query heatmaps.
- * TODO: Implement full variant layout.
+ * Variant 5: Minimal Analyst — Editorial Data Journalism
+ * NYT/FT-inspired layout. No sidebar. Horizontal top nav, document flow.
+ * Paper-white, serif headlines, generous whitespace.
  */
 import React from 'react';
-import { Link } from 'react-router-dom';
-import { Layout, ArrowLeft } from 'lucide-react';
+import { Routes, Route, NavLink, Navigate, Link } from 'react-router-dom';
+import {
+  LayoutDashboard,
+  Network,
+  Radio,
+  Globe,
+  Shield,
+  Search,
+  ArrowLeft,
+} from 'lucide-react';
+import Dashboard from './pages/Dashboard';
+import Connections from './pages/Connections';
+import Beacons from './pages/Beacons';
+import DnsThreats from './pages/DnsThreats';
+import Threats from './pages/Threats';
+import HuntResults from './pages/HuntResults';
+import './styles.css';
+
+const NAV_ITEMS = [
+  { to: '/5', icon: LayoutDashboard, label: 'Overview', end: true },
+  { to: '/5/connections', icon: Network, label: 'Connections', end: false },
+  { to: '/5/beacons', icon: Radio, label: 'Beacons', end: false },
+  { to: '/5/dns', icon: Globe, label: 'DNS', end: false },
+  { to: '/5/threats', icon: Shield, label: 'Threats', end: false },
+  { to: '/5/hunts', icon: Search, label: 'Intelligence', end: false },
+];
 
 const V5App: React.FC = () => {
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b border-green-500/20 bg-surface/80 px-4 py-3 flex items-center gap-3">
-        <Link to="/" className="text-gray-500 hover:text-gray-300 transition-colors">
-          <ArrowLeft size={18} />
-        </Link>
-        <Layout size={20} className="text-green-400" />
-        <h1 className="text-lg font-semibold text-green-400">V5 — DNS Intelligence</h1>
-      </header>
-      <main className="p-6">
-        <div className="rounded-lg border border-green-500/20 bg-surface/30 p-8 text-center">
-          <p className="text-gray-400">Variant 5 shell — implementation pending.</p>
+    <div className="v5-root">
+      {/* Horizontal top nav */}
+      <nav className="v5-nav">
+        <div className="v5-nav-inner">
+          <Link to="/5" className="v5-nav-brand">
+            Bro Hunter
+          </Link>
+
+          <div className="v5-nav-links">
+            {NAV_ITEMS.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end}
+                className={({ isActive }) =>
+                  `v5-nav-link${isActive ? ' active' : ''}`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+
+          <Link to="/" className="v5-nav-back">
+            <ArrowLeft size={14} />
+            Variants
+          </Link>
         </div>
+      </nav>
+
+      {/* Document-flow main content */}
+      <main className="v5-container v5-content">
+        <Routes>
+          <Route index element={<Dashboard />} />
+          <Route path="connections" element={<Connections />} />
+          <Route path="beacons" element={<Beacons />} />
+          <Route path="dns" element={<DnsThreats />} />
+          <Route path="threats" element={<Threats />} />
+          <Route path="hunts" element={<HuntResults />} />
+          <Route path="*" element={<Navigate to="/5" replace />} />
+        </Routes>
       </main>
     </div>
   );

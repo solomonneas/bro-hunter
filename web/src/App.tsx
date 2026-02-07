@@ -5,6 +5,7 @@
 import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import VariantPicker from './pages/VariantPicker';
+import KeyboardHints from './components/KeyboardHints';
 
 // Lazy-load variant apps for code splitting
 const V1App = lazy(() => import('./variants/v1/App'));
@@ -47,6 +48,7 @@ function App() {
   return (
     <BrowserRouter>
       <VariantKeyboardNav />
+      <KeyboardHints />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<VariantPicker />} />

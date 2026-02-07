@@ -106,12 +106,15 @@ export const VariantPicker: React.FC = () => {
                 <span className="text-gray-300 group-hover:text-white transition-colors">
                   {v.icon}
                 </span>
-                <div>
+                <div className="flex-1">
                   <span className="text-xs font-mono text-gray-500">V{v.id}</span>
                   <h3 className="text-base font-semibold text-gray-200 group-hover:text-white transition-colors">
                     {v.name}
                   </h3>
                 </div>
+                <kbd className="text-xs font-mono px-2 py-0.5 rounded bg-white/5 border border-white/10 text-gray-500 group-hover:text-gray-300 group-hover:border-white/20 transition-colors">
+                  {v.id}
+                </kbd>
               </div>
               <p className="text-xs text-gray-400 leading-relaxed">
                 {v.description}

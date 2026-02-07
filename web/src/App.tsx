@@ -2,8 +2,8 @@
  * Root App component with React Router.
  * / = VariantPicker, /1/* through /5/* = variant apps.
  */
-import React, { lazy, Suspense } from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { lazy, Suspense, useEffect } from 'react';
+import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import VariantPicker from './pages/VariantPicker';
 
 // Lazy-load variant apps for code splitting
@@ -22,9 +22,31 @@ const LoadingFallback: React.FC = () => (
   </div>
 );
 
+function VariantKeyboardNav() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const num = parseInt(e.key);
+      if (num >= 1 && num <= 5) {
+        navigate(`/${num}`);
+      } else if (e.key === 'Escape' || e.key === '0') {
+        navigate('/');
+      }
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [navigate, location]);
+
+  return null;
+}
+
 function App() {
   return (
     <BrowserRouter>
+      <VariantKeyboardNav />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<VariantPicker />} />

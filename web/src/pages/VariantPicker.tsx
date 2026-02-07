@@ -1,7 +1,7 @@
 /**
  * VariantPicker — Landing page for selecting one of 5 frontend variants.
  */
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Shield, Layout, BarChart3, Terminal, Zap } from 'lucide-react';
 
@@ -60,6 +60,16 @@ const VARIANTS: VariantCard[] = [
 export const VariantPicker: React.FC = () => {
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const handleKey = (e: KeyboardEvent) => {
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+      const num = parseInt(e.key);
+      if (num >= 1 && num <= 5) navigate(`/${num}`);
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [navigate]);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -77,9 +87,12 @@ export const VariantPicker: React.FC = () => {
 
       {/* Variant Grid */}
       <main className="max-w-5xl mx-auto px-6 py-10">
-        <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-6">
-          Select a Variant
-        </h2>
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider">
+            Select a Variant
+          </h2>
+          <span className="text-xs text-gray-600 font-mono">Press 1-5 to switch variants</span>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" role="list" aria-label="Available dashboard variants">
           {VARIANTS.map((v) => (
             <button

@@ -1,11 +1,13 @@
 /**
  * Root App component with React Router.
- * / = VariantPicker, /1/* through /5/* = variant apps.
+ * / = VariantPicker (or auto-redirect if default set), /1/* through /5/* = variant apps.
  */
 import React, { lazy, Suspense, useEffect } from 'react';
 import { BrowserRouter, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import VariantPicker from './pages/VariantPicker';
 import KeyboardHints from './components/KeyboardHints';
+import VariantSettings from './components/VariantSettings';
+import { useDefaultVariant } from './hooks/useDefaultVariant';
 
 // Lazy-load variant apps for code splitting
 const V1App = lazy(() => import('./variants/v1/App'));
@@ -13,6 +15,15 @@ const V2App = lazy(() => import('./variants/v2/App'));
 const V3App = lazy(() => import('./variants/v3/App'));
 const V4App = lazy(() => import('./variants/v4/App'));
 const V5App = lazy(() => import('./variants/v5/App'));
+
+const APP_ID = 'bro-hunter';
+const VARIANT_NAMES = [
+  'NOC Command Center',
+  'Executive Overview',
+  'Threat Hunter Workbench',
+  'Beacon Analyzer',
+  'DNS Intelligence',
+];
 
 const LoadingFallback: React.FC = () => (
   <div className="min-h-screen bg-background flex items-center justify-center">
@@ -44,11 +55,39 @@ function VariantKeyboardNav() {
   return null;
 }
 
-function App() {
+function DefaultVariantRedirect() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { defaultVariant } = useDefaultVariant(APP_ID);
+
+  useEffect(() => {
+    if (location.pathname === '/' && defaultVariant) {
+      navigate(`/${defaultVariant}`, { replace: true });
+    }
+  }, [location.pathname, defaultVariant, navigate]);
+
+  return null;
+}
+
+function AppContent() {
+  const location = useLocation();
+  const { defaultVariant, setDefaultVariant } = useDefaultVariant(APP_ID);
+
+  // Extract current variant from path
+  const variantMatch = location.pathname.match(/^\/([1-5])/);
+  const currentVariant = variantMatch ? parseInt(variantMatch[1], 10) : null;
+
   return (
-    <BrowserRouter>
+    <>
       <VariantKeyboardNav />
+      <DefaultVariantRedirect />
       <KeyboardHints />
+      <VariantSettings
+        currentVariant={currentVariant}
+        defaultVariant={defaultVariant}
+        onSetDefault={setDefaultVariant}
+        variantNames={VARIANT_NAMES}
+      />
       <Suspense fallback={<LoadingFallback />}>
         <Routes>
           <Route path="/" element={<VariantPicker />} />
@@ -59,6 +98,14 @@ function App() {
           <Route path="/5/*" element={<V5App />} />
         </Routes>
       </Suspense>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
     </BrowserRouter>
   );
 }

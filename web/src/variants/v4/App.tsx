@@ -42,7 +42,7 @@ const NeonClock: React.FC = () => {
     return () => clearInterval(t);
   }, []);
   return (
-    <span className="v4-nav-clock">
+    <span className="v4-nav-clock" aria-label="Current time">
       {format(now, 'HH:mm:ss')}
     </span>
   );
@@ -54,9 +54,9 @@ const V4App: React.FC = () => {
   return (
     <div className="v4-root">
       {/* Angular Top Nav */}
-      <nav className="v4-nav">
-        <Link to="/4" className="v4-nav-brand">
-          <Zap size={20} />
+      <nav className="v4-nav" aria-label="Main navigation">
+        <Link to="/4" className="v4-nav-brand" aria-label="Bro Hunter home">
+          <Zap size={20} aria-hidden="true" />
           <span className="v4-nav-brand-text">Bro Hunter</span>
         </Link>
 
@@ -69,8 +69,9 @@ const V4App: React.FC = () => {
               className={({ isActive }) =>
                 `v4-nav-link${isActive ? ' active' : ''}`
               }
+              aria-label={item.label}
             >
-              <item.icon size={14} />
+              <item.icon size={14} aria-hidden="true" />
               {item.label}
             </NavLink>
           ))}
@@ -79,6 +80,8 @@ const V4App: React.FC = () => {
         <div className="v4-nav-right">
           <NeonClock />
           <div
+            role="status"
+            aria-label={`${critCount} critical alerts`}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -100,11 +103,11 @@ const V4App: React.FC = () => {
               clipPath: 'polygon(4px 0, 100% 0, calc(100% - 4px) 100%, 0 100%)',
             }}
           >
-            <AlertTriangle size={12} />
+            <AlertTriangle size={12} aria-hidden="true" />
             {critCount} CRITICAL
           </div>
-          <Link to="/" className="v4-nav-back">
-            <ArrowLeft size={12} />
+          <Link to="/" className="v4-nav-back" aria-label="Back to all variants">
+            <ArrowLeft size={12} aria-hidden="true" />
             EXIT
           </Link>
         </div>

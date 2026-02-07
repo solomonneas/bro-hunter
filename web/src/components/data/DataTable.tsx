@@ -4,7 +4,7 @@
  */
 import React, { useState, useMemo, useCallback } from 'react';
 import { ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
-import type { SortConfig, PaginationState } from '../../types';
+import type { SortConfig } from '../../types';
 
 export interface Column<T> {
   key: string;
@@ -38,12 +38,7 @@ export function DataTable<T>({
 }: DataTableProps<T>) {
   const [sort, setSort] = useState<SortConfig | null>(null);
   const [search, setSearch] = useState('');
-  const [pagination, setPagination] = useState<PaginationState>({
-    page: 1,
-    pageSize,
-    totalItems: 0,
-    totalPages: 0,
-  });
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Filter
   const filtered = useMemo(() => {
@@ -70,22 +65,16 @@ export function DataTable<T>({
     return arr;
   }, [filtered, sort, columns]);
 
+  // Derive pagination values (no state needed for computed values)
+  const totalItems = sorted.length;
+  const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
+  const page = Math.min(currentPage, totalPages);
+
   // Paginate
-  const totalPages = Math.max(1, Math.ceil(sorted.length / pageSize));
-  const page = Math.min(pagination.page, totalPages);
   const paged = useMemo(
     () => sorted.slice((page - 1) * pageSize, page * pageSize),
     [sorted, page, pageSize],
   );
-
-  // Update totalItems when data changes
-  useMemo(() => {
-    setPagination((p) => ({
-      ...p,
-      totalItems: sorted.length,
-      totalPages,
-    }));
-  }, [sorted.length, totalPages]);
 
   const handleSort = useCallback(
     (key: string) => {
@@ -102,11 +91,11 @@ export function DataTable<T>({
   );
 
   const SortIcon = ({ colKey }: { colKey: string }) => {
-    if (sort?.key !== colKey) return <ChevronsUpDown size={14} className="opacity-30" />;
+    if (sort?.key !== colKey) return <ChevronsUpDown size={14} className="opacity-30" aria-hidden="true" />;
     return sort.direction === 'asc' ? (
-      <ChevronUp size={14} className="text-accent-cyan" />
+      <ChevronUp size={14} className="text-accent-cyan" aria-hidden="true" />
     ) : (
-      <ChevronDown size={14} className="text-accent-cyan" />
+      <ChevronDown size={14} className="text-accent-cyan" aria-hidden="true" />
     );
   };
 
@@ -117,10 +106,11 @@ export function DataTable<T>({
         <input
           type="text"
           placeholder="Search…"
+          aria-label="Search table data"
           value={search}
           onChange={(e) => {
             setSearch(e.target.value);
-            setPagination((p) => ({ ...p, page: 1 }));
+            setCurrentPage(1);
           }}
           className="bg-background border border-gray-700 rounded px-3 py-1.5 text-sm text-gray-200 placeholder-gray-500 focus:outline-none focus:border-accent-cyan w-full max-w-xs"
         />
@@ -139,6 +129,7 @@ export function DataTable<T>({
                   }`}
                   style={{ width: col.width }}
                   onClick={() => col.sortValue && handleSort(col.key)}
+                  aria-sort={sort?.key === col.key ? (sort.direction === 'asc' ? 'ascending' : 'descending') : undefined}
                 >
                   <span className="inline-flex items-center gap-1">
                     {col.header}
@@ -183,24 +174,26 @@ export function DataTable<T>({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-xs text-gray-400">
+        <div className="flex items-center justify-between text-xs text-gray-400" role="navigation" aria-label="Table pagination">
           <span>
-            {sorted.length} items · Page {page} of {totalPages}
+            {totalItems} items · Page {page} of {totalPages}
           </span>
           <div className="flex gap-1">
             <button
               disabled={page <= 1}
-              onClick={() => setPagination((p) => ({ ...p, page: p.page - 1 }))}
+              onClick={() => setCurrentPage((p) => p - 1)}
               className="p-1 rounded hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
+              aria-label="Previous page"
             >
-              <ChevronLeft size={16} />
+              <ChevronLeft size={16} aria-hidden="true" />
             </button>
             <button
               disabled={page >= totalPages}
-              onClick={() => setPagination((p) => ({ ...p, page: p.page + 1 }))}
+              onClick={() => setCurrentPage((p) => p + 1)}
               className="p-1 rounded hover:bg-surface disabled:opacity-30 disabled:cursor-not-allowed"
+              aria-label="Next page"
             >
-              <ChevronRight size={16} />
+              <ChevronRight size={16} aria-hidden="true" />
             </button>
           </div>
         </div>

@@ -35,9 +35,9 @@ const V5App: React.FC = () => {
   return (
     <div className="v5-root">
       {/* Horizontal top nav */}
-      <nav className="v5-nav">
+      <nav className="v5-nav" aria-label="Main navigation">
         <div className="v5-nav-inner">
-          <Link to="/5" className="v5-nav-brand">
+          <Link to="/5" className="v5-nav-brand" aria-label="Bro Hunter home">
             Bro Hunter
           </Link>
 
@@ -50,14 +50,15 @@ const V5App: React.FC = () => {
                 className={({ isActive }) =>
                   `v5-nav-link${isActive ? ' active' : ''}`
                 }
+                aria-label={item.label}
               >
                 {item.label}
               </NavLink>
             ))}
           </div>
 
-          <Link to="/" className="v5-nav-back">
-            <ArrowLeft size={14} />
+          <Link to="/" className="v5-nav-back" aria-label="Back to all variants">
+            <ArrowLeft size={14} aria-hidden="true" />
             Variants
           </Link>
         </div>

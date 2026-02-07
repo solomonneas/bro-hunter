@@ -54,7 +54,7 @@ const Clock: React.FC = () => {
     return () => clearInterval(t);
   }, []);
   return (
-    <span className="v3-header-time">
+    <span className="v3-header-time" aria-label="Current time">
       {format(now, 'MMM d, yyyy')} · {format(now, 'HH:mm:ss')}
     </span>
   );
@@ -70,9 +70,9 @@ const V3App: React.FC = () => {
   return (
     <div className={`v3-root${collapsed ? ' collapsed' : ''}`}>
       {/* Sidebar */}
-      <nav className="v3-sidebar">
+      <nav className="v3-sidebar" aria-label="Main navigation">
         <div className="v3-sidebar-brand">
-          <ShieldCheck size={22} />
+          <ShieldCheck size={22} aria-hidden="true" />
           <span className="v3-sidebar-brand-text">Bro Hunter</span>
         </div>
 
@@ -86,8 +86,9 @@ const V3App: React.FC = () => {
                 `v3-nav-item${isActive ? ' active' : ''}`
               }
               title={item.label}
+              aria-label={item.label}
             >
-              <item.icon size={20} />
+              <item.icon size={20} aria-hidden="true" />
               <span className="v3-nav-label">{item.label}</span>
             </NavLink>
           ))}
@@ -97,13 +98,14 @@ const V3App: React.FC = () => {
           <button
             className="v3-collapse-btn"
             onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
             title={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
           >
-            {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+            {collapsed ? <PanelLeftOpen size={16} aria-hidden="true" /> : <PanelLeftClose size={16} aria-hidden="true" />}
             {!collapsed && <span>Collapse</span>}
           </button>
-          <Link to="/">
-            <ArrowLeft size={14} />
+          <Link to="/" aria-label="Back to all variants">
+            <ArrowLeft size={14} aria-hidden="true" />
             {!collapsed && <span>All Variants</span>}
           </Link>
         </div>
@@ -112,18 +114,19 @@ const V3App: React.FC = () => {
       {/* Header */}
       <header className="v3-header">
         <div className="v3-header-left">
-          <div className="v3-breadcrumb">
+          <nav className="v3-breadcrumb" aria-label="Breadcrumb">
             <Link to="/3">SOC</Link>
-            <ChevronRight size={12} className="v3-breadcrumb-sep" />
-            <span className="v3-breadcrumb-current">{currentPage}</span>
-          </div>
+            <ChevronRight size={12} className="v3-breadcrumb-sep" aria-hidden="true" />
+            <span className="v3-breadcrumb-current" aria-current="page">{currentPage}</span>
+          </nav>
         </div>
 
         <div className="v3-header-search">
-          <Search size={14} />
+          <Search size={14} aria-hidden="true" />
           <input
             type="text"
             placeholder="Search IPs, domains, techniques…"
+            aria-label="Search IPs, domains, techniques"
             readOnly
           />
         </div>
@@ -131,6 +134,8 @@ const V3App: React.FC = () => {
         <div className="v3-header-right">
           <Clock />
           <div
+            role="status"
+            aria-label={`${critCount} critical alerts`}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -143,7 +148,7 @@ const V3App: React.FC = () => {
               fontWeight: 600,
             }}
           >
-            <Bell size={14} />
+            <Bell size={14} aria-hidden="true" />
             {critCount} Critical
           </div>
         </div>

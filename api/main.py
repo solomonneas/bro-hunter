@@ -2,10 +2,34 @@
 Bro Hunter API - FastAPI application entry point.
 Provides REST endpoints for network log analysis and threat hunting.
 """
+import os
+import sys
+import logging
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.config import settings
 from api.routers import analysis, logs, ingest, data, hunt, dns_threat
+
+logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# Production safety check: refuse to start without an API key in production
+# ---------------------------------------------------------------------------
+_env = os.environ.get("BROHUNTER_ENV", "development").lower()
+if _env == "production" and not settings.api_key:
+    logger.critical(
+        "FATAL: BROHUNTER_ENV is 'production' but BROHUNTER_API_KEY is not set. "
+        "Refusing to start without authentication. "
+        "Set BROHUNTER_API_KEY to a secure random value."
+    )
+    sys.exit(1)
+
+if not settings.api_key:
+    logger.warning(
+        "BROHUNTER_API_KEY is not set — authentication is disabled (dev mode). "
+        "Set BROHUNTER_ENV=production and BROHUNTER_API_KEY for production use."
+    )
 
 
 # Initialize FastAPI app

@@ -40,9 +40,9 @@ const Clock: React.FC = () => {
     return () => clearInterval(t);
   }, []);
   return (
-    <span className="v1-clock">
+    <span className="v1-clock" aria-live="off" aria-label="Current time">
       {format(now, 'yyyy-MM-dd')}
-      <span style={{ opacity: 0.4, margin: '0 4px' }}>|</span>
+      <span style={{ opacity: 0.4, margin: '0 4px' }} aria-hidden="true">|</span>
       {format(now, 'HH:mm:ss')}
       <span style={{ opacity: 0.3, marginLeft: 4, fontSize: 10 }}>UTC</span>
     </span>
@@ -55,8 +55,8 @@ const V1App: React.FC = () => {
   return (
     <div className="v1-root v1-scanline">
       {/* Sidebar */}
-      <nav className="v1-sidebar">
-        <div className="v1-sidebar-logo">
+      <nav className="v1-sidebar" aria-label="Main navigation">
+        <div className="v1-sidebar-logo" aria-hidden="true">
           <Crosshair size={24} />
         </div>
 
@@ -69,16 +69,17 @@ const V1App: React.FC = () => {
               className={({ isActive }) =>
                 `v1-nav-item${isActive ? ' active' : ''}`
               }
+              aria-label={item.label}
             >
-              <item.icon />
+              <item.icon aria-hidden="true" />
               <span className="v1-nav-label">{item.label}</span>
             </NavLink>
           ))}
         </div>
 
         <div className="v1-sidebar-footer">
-          <Link to="/">
-            <ArrowLeft size={16} />
+          <Link to="/" aria-label="Back to all variants">
+            <ArrowLeft size={16} aria-hidden="true" />
             <span className="v1-nav-label">All Variants</span>
           </Link>
         </div>
@@ -87,7 +88,7 @@ const V1App: React.FC = () => {
       {/* Top Bar */}
       <header className="v1-topbar">
         <div className="v1-topbar-brand">
-          <Crosshair size={20} />
+          <Crosshair size={20} aria-hidden="true" />
           <span>Bro Hunter</span>
           <span style={{ fontSize: 10, fontWeight: 400, opacity: 0.4, letterSpacing: 1 }}>
             v1 NOC
@@ -95,8 +96,8 @@ const V1App: React.FC = () => {
         </div>
         <div className="v1-topbar-right">
           <Clock />
-          <div className="v1-threat-badge">
-            <span className="pulse-dot" />
+          <div className="v1-threat-badge" role="status" aria-label={`${critCount} critical alerts`}>
+            <span className="pulse-dot" aria-hidden="true" />
             {critCount} CRITICAL
           </div>
         </div>

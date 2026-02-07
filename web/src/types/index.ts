@@ -246,6 +246,125 @@ export interface SmtpLog {
 }
 
 // ============================================================================
+// Suricata Sub-Object Types
+// ============================================================================
+
+/** Suricata alert rule metadata. */
+export interface SuricataAlertInfo {
+  action?: string;
+  gid?: number;
+  signature_id?: number;
+  rev?: number;
+  signature?: string;
+  category?: string;
+  severity?: number;
+  metadata?: Record<string, string[]>;
+}
+
+/** Suricata packet metadata. */
+export interface SuricataPacketInfo {
+  linktype?: number;
+}
+
+/** Suricata HTTP sub-object. */
+export interface SuricataHttpInfo {
+  hostname?: string;
+  url?: string;
+  http_user_agent?: string;
+  http_content_type?: string;
+  http_method?: string;
+  http_refer?: string;
+  protocol?: string;
+  status?: number;
+  length?: number;
+  redirect?: string;
+}
+
+/** Suricata DNS sub-object. */
+export interface SuricataDnsInfo {
+  type?: string;
+  id?: number;
+  flags?: string;
+  qr?: boolean;
+  rd?: boolean;
+  ra?: boolean;
+  rrname?: string;
+  rrtype?: string;
+  rcode?: string;
+  rdata?: string;
+  ttl?: number;
+  tx_id?: number;
+}
+
+/** Suricata TLS sub-object. */
+export interface SuricataTlsInfo {
+  subject?: string;
+  issuerdn?: string;
+  serial?: string;
+  fingerprint?: string;
+  sni?: string;
+  version?: string;
+  notbefore?: string;
+  notafter?: string;
+  ja3?: { hash?: string; string?: string };
+  ja3s?: { hash?: string; string?: string };
+}
+
+/** Suricata SSH sub-object. */
+export interface SuricataSshInfo {
+  client?: { proto_version?: string; software_version?: string };
+  server?: { proto_version?: string; software_version?: string };
+}
+
+/** Suricata SMTP sub-object. */
+export interface SuricataSmtpInfo {
+  helo?: string;
+  mail_from?: string;
+  rcpt_to?: string[];
+}
+
+/** Suricata file info sub-object. */
+export interface SuricataFileInfo {
+  filename?: string;
+  magic?: string;
+  gaps?: boolean;
+  state?: string;
+  md5?: string;
+  sha1?: string;
+  sha256?: string;
+  stored?: boolean;
+  file_id?: number;
+  size?: number;
+  tx_id?: number;
+}
+
+/** Suricata flow sub-object (used in flow events and as sub-object in other events). */
+export interface SuricataFlowInfo {
+  pkts_toserver?: number;
+  pkts_toclient?: number;
+  bytes_toserver?: number;
+  bytes_toclient?: number;
+  start?: string;
+  end?: string;
+  age?: number;
+  state?: string;
+  reason?: string;
+  alerted?: boolean;
+}
+
+/** Suricata TCP sub-object. */
+export interface SuricataTcpInfo {
+  tcp_flags?: string;
+  tcp_flags_ts?: string;
+  tcp_flags_tc?: string;
+  syn?: boolean;
+  rst?: boolean;
+  psh?: boolean;
+  ack?: boolean;
+  state?: string;
+}
+
+// ============================================================================
 // Suricata Log Types
 // ============================================================================
 
@@ -260,20 +379,20 @@ export interface SuricataAlert {
   dest_port: number;
   proto: string;
   tx_id?: number;
-  alert: Record<string, any>;
+  alert: SuricataAlertInfo;
   payload?: string;
   payload_printable?: string;
   stream?: number;
   packet?: string;
-  packet_info?: Record<string, any>;
+  packet_info?: SuricataPacketInfo;
   app_proto?: string;
-  http?: Record<string, any>;
-  dns?: Record<string, any>;
-  tls?: Record<string, any>;
-  ssh?: Record<string, any>;
-  smtp?: Record<string, any>;
-  fileinfo?: Record<string, any>;
-  flow?: Record<string, any>;
+  http?: SuricataHttpInfo;
+  dns?: SuricataDnsInfo;
+  tls?: SuricataTlsInfo;
+  ssh?: SuricataSshInfo;
+  smtp?: SuricataSmtpInfo;
+  fileinfo?: SuricataFileInfo;
+  flow?: SuricataFlowInfo;
 }
 
 export interface SuricataFlow {
@@ -289,8 +408,8 @@ export interface SuricataFlow {
   app_proto?: string;
   app_proto_tc?: string;
   app_proto_ts?: string;
-  flow: Record<string, any>;
-  tcp?: Record<string, any>;
+  flow: SuricataFlowInfo;
+  tcp?: SuricataTcpInfo;
   community_id?: string;
 }
 
@@ -304,7 +423,7 @@ export interface SuricataDns {
   dest_ip: string;
   dest_port: number;
   proto: string;
-  dns: Record<string, any>;
+  dns: SuricataDnsInfo;
   community_id?: string;
 }
 
@@ -319,8 +438,8 @@ export interface SuricataHttp {
   dest_port: number;
   proto: string;
   tx_id: number;
-  http: Record<string, any>;
-  fileinfo?: Record<string, any>;
+  http: SuricataHttpInfo;
+  fileinfo?: SuricataFileInfo;
   community_id?: string;
 }
 
@@ -334,7 +453,7 @@ export interface SuricataTls {
   dest_ip: string;
   dest_port: number;
   proto: string;
-  tls: Record<string, any>;
+  tls: SuricataTlsInfo;
   community_id?: string;
 }
 

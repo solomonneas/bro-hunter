@@ -43,7 +43,7 @@ const Uptime: React.FC = () => {
   const m = Math.floor((secs % 3600) / 60);
   const s = secs % 60;
   return (
-    <span className="v2-uptime">
+    <span className="v2-uptime" aria-label="Session uptime">
       uptime {String(h).padStart(2, '0')}:{String(m).padStart(2, '0')}:{String(s).padStart(2, '0')}
     </span>
   );
@@ -55,9 +55,9 @@ const V2App: React.FC = () => {
   return (
     <div className="v2-root v2-crt">
       {/* Sidebar */}
-      <nav className="v2-sidebar">
+      <nav className="v2-sidebar" aria-label="Main navigation">
         <div className="v2-sidebar-header">
-          <Terminal />
+          <Terminal aria-hidden="true" />
           BRO_HUNTER
         </div>
 
@@ -70,16 +70,17 @@ const V2App: React.FC = () => {
               className={({ isActive }) =>
                 `v2-nav-item${isActive ? ' active' : ''}`
               }
+              aria-label={item.label}
             >
-              <item.icon />
+              <item.icon aria-hidden="true" />
               {item.label}
             </NavLink>
           ))}
         </div>
 
         <div className="v2-sidebar-footer">
-          <Link to="/">
-            <ArrowLeft size={14} />
+          <Link to="/" aria-label="Back to all variants">
+            <ArrowLeft size={14} aria-hidden="true" />
             exit_variant
           </Link>
         </div>
@@ -87,7 +88,7 @@ const V2App: React.FC = () => {
 
       {/* Top Bar */}
       <header className="v2-topbar">
-        <div className="v2-prompt">
+        <div className="v2-prompt" aria-hidden="true">
           <span className="v2-prompt-user">root</span>
           <span className="v2-prompt-host">@brohunter</span>
           <span className="v2-prompt-path">:~$</span>
@@ -98,8 +99,8 @@ const V2App: React.FC = () => {
           <Uptime />
           <span className="v2-dim">{format(new Date(), 'yyyy-MM-dd')}</span>
           {critCount > 0 && (
-            <span className="v2-threat-indicator">
-              <span className="pulse-dot" />
+            <span className="v2-threat-indicator" role="status" aria-label={`${critCount} critical alerts`}>
+              <span className="pulse-dot" aria-hidden="true" />
               [{critCount}] CRITICAL
             </span>
           )}

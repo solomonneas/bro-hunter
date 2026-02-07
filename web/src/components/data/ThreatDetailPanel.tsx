@@ -35,7 +35,7 @@ export const ThreatDetailPanel: React.FC<ThreatDetailPanelProps> = ({ threat, on
   const lastSeen = format(new Date(threat.last_seen * 1000), 'MMM d, yyyy HH:mm:ss');
 
   return (
-    <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-surface border-l border-gray-700 shadow-2xl z-50 overflow-y-auto">
+    <div className="fixed inset-y-0 right-0 w-full max-w-lg bg-surface border-l border-gray-700 shadow-2xl z-50 overflow-y-auto" role="dialog" aria-label={`Threat detail: ${threat.entity}`}>
       {/* Header */}
       <div className="sticky top-0 bg-surface/95 backdrop-blur border-b border-gray-700 px-5 py-4 flex items-center justify-between">
         <div>
@@ -45,8 +45,9 @@ export const ThreatDetailPanel: React.FC<ThreatDetailPanelProps> = ({ threat, on
         <button
           onClick={onClose}
           className="p-1.5 rounded hover:bg-gray-700 text-gray-400 hover:text-gray-200 transition-colors"
+          aria-label="Close threat detail panel"
         >
-          <X size={18} />
+          <X size={18} aria-hidden="true" />
         </button>
       </div>
 
@@ -65,14 +66,14 @@ export const ThreatDetailPanel: React.FC<ThreatDetailPanelProps> = ({ threat, on
         {/* Timeline */}
         <div className="grid grid-cols-2 gap-3">
           <div className="flex items-center gap-2 text-xs text-gray-400">
-            <Clock size={14} />
+            <Clock size={14} aria-hidden="true" />
             <div>
               <p className="text-gray-500">First Seen</p>
               <p className="text-gray-300 font-mono">{firstSeen}</p>
             </div>
           </div>
           <div className="flex items-center gap-2 text-xs text-gray-400">
-            <Clock size={14} />
+            <Clock size={14} aria-hidden="true" />
             <div>
               <p className="text-gray-500">Last Seen</p>
               <p className="text-gray-300 font-mono">{lastSeen}</p>
@@ -82,7 +83,7 @@ export const ThreatDetailPanel: React.FC<ThreatDetailPanelProps> = ({ threat, on
 
         {/* Occurrences */}
         <div className="flex items-center gap-2 text-sm text-gray-300">
-          <Activity size={14} className="text-accent-cyan" />
+          <Activity size={14} className="text-accent-cyan" aria-hidden="true" />
           <span>{threat.occurrence_count} total occurrences</span>
         </div>
 
@@ -92,7 +93,7 @@ export const ThreatDetailPanel: React.FC<ThreatDetailPanelProps> = ({ threat, on
           <ul className="space-y-1.5">
             {threat.reasons.map((r, i) => (
               <li key={i} className="text-xs text-gray-400 flex items-start gap-2">
-                <span className="mt-1 w-1 h-1 rounded-full bg-accent-amber flex-shrink-0" />
+                <span className="mt-1 w-1 h-1 rounded-full bg-accent-amber flex-shrink-0" aria-hidden="true" />
                 {r}
               </li>
             ))}
@@ -103,7 +104,7 @@ export const ThreatDetailPanel: React.FC<ThreatDetailPanelProps> = ({ threat, on
         {threat.mitre_techniques.length > 0 && (
           <div>
             <h3 className="text-sm font-semibold text-gray-300 mb-2 flex items-center gap-2">
-              <Target size={14} />
+              <Target size={14} aria-hidden="true" />
               MITRE ATT&CK
             </h3>
             <div className="flex flex-wrap gap-2">
@@ -114,9 +115,10 @@ export const ThreatDetailPanel: React.FC<ThreatDetailPanelProps> = ({ threat, on
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1 px-2 py-1 rounded text-xs font-mono bg-accent-cyan/10 text-accent-cyan border border-accent-cyan/20 hover:bg-accent-cyan/20 transition-colors"
+                  aria-label={`View MITRE technique ${t} (opens in new tab)`}
                 >
                   {t}
-                  <ExternalLink size={10} />
+                  <ExternalLink size={10} aria-hidden="true" />
                 </a>
               ))}
             </div>

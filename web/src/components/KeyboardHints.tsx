@@ -23,7 +23,6 @@ const DEFAULT_SHORTCUTS: Shortcut[] = [
 
 export const KeyboardHints: React.FC<KeyboardHintsProps> = ({
   shortcuts = DEFAULT_SHORTCUTS,
-  variant = 'app',
 }) => {
   const [open, setOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);

@@ -97,6 +97,7 @@ export const VariantSettings: React.FC<VariantSettingsProps> = ({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
               {/* Show picker option */}
               <button
+                type="button"
                 onClick={() => { onSetDefault(null); setOpen(false); }}
                 style={{
                   display: 'flex',
@@ -132,6 +133,7 @@ export const VariantSettings: React.FC<VariantSettingsProps> = ({
                 const isCurrent = currentVariant === num;
                 return (
                   <button
+                    type="button"
                     key={num}
                     onClick={() => { onSetDefault(num); setOpen(false); }}
                     style={{

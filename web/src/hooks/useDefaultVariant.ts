@@ -26,14 +26,15 @@ export function useDefaultVariant(appId: string) {
   })
 
   const setDefaultVariant = useCallback((variant: number | null) => {
+    const safe = variant !== null && variant >= 1 && variant <= 5 ? variant : null
     try {
-      if (variant === null) {
+      if (safe === null) {
         localStorage.removeItem(key)
       } else {
-        localStorage.setItem(key, String(variant))
+        localStorage.setItem(key, String(safe))
       }
     } catch {}
-    setDefaultVariantState(variant)
+    setDefaultVariantState(safe)
   }, [key])
 
   const clearDefault = useCallback(() => {

@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
 </p>
 
-# 🎯 Bro Hunter
+# 🎯 Solomon's Bro Hunter
 
 **Hunt threats in network traffic with explainable scoring and MITRE ATT&CK mapping.**
 

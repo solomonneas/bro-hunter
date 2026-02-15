@@ -1,6 +1,7 @@
 """
 Live Capture Router - Start/stop/manage packet capture sessions.
 """
+import time
 from typing import Optional
 from fastapi import APIRouter, Query, HTTPException
 from pydantic import BaseModel
@@ -141,4 +142,3 @@ def _serialize_session(session) -> dict:
     }
 
 
-import time  # for _serialize_session duration calc

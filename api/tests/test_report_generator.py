@@ -52,7 +52,7 @@ class TestReportGenerator:
 
         store = self._mock_store()
         generator = ReportGenerator(store)
-        html = generator.generate_html()
+        _html = generator.generate_html()
 
         assert "<!DOCTYPE html>" in html
         assert "Threat Assessment Report" in html
@@ -69,5 +69,5 @@ class TestReportGenerator:
         generator = ReportGenerator(store)
         # Should not raise
         report = generator.generate_json()
-        html = generator.generate_html()
+        _html = generator.generate_html()
         assert report["executive_summary"]["total_threats"] == 0

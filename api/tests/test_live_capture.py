@@ -1,5 +1,6 @@
 """Tests for live capture service."""
 import pytest
+from unittest.mock import patch, MagicMock
 
 from api.services.live_capture import LiveCaptureService, CaptureSession
 
@@ -53,7 +54,14 @@ class TestCaptureService:
         service = LiveCaptureService()
         assert service.stop_capture("nonexistent") is None
 
-    def test_get_interfaces_returns_list(self):
+    @patch("api.services.live_capture.subprocess.run")
+    def test_get_interfaces_returns_list(self, mock_run):
+        mock_result = MagicMock()
+        mock_result.returncode = 0
+        mock_result.stdout = '[{"ifname":"eth0","operstate":"UP","mtu":1500},{"ifname":"lo","operstate":"UNKNOWN","mtu":65536}]'
+        mock_run.return_value = mock_result
         service = LiveCaptureService()
         interfaces = service.get_interfaces()
         assert isinstance(interfaces, list)
+        assert len(interfaces) == 2
+        assert interfaces[0]["name"] == "eth0"

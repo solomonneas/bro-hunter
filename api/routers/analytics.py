@@ -144,7 +144,7 @@ async def threat_heatmap():
         pairs[key]["connections"] += 1
 
     for alert in store.alerts:
-        key = f"{alert.src_ip}|{alert.dest_ip}"
+        key = f"{alert.src_ip}|{alert.dst_ip}"
         pairs[key]["alerts"] += 1
 
     # Enhance with threat scores

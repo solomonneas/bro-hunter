@@ -65,12 +65,16 @@ const AnalyticsDashboard: React.FC<AnalyticsDashboardProps> = ({ className = '' 
   const fetchAll = async () => {
     setLoading(true);
     try {
+      const safeFetch = (url: string) => fetch(url).then(r => {
+        if (!r.ok) throw new Error(`${url} returned ${r.status}`);
+        return r.json();
+      });
       const [tt, proto, tl, hm, geo] = await Promise.all([
-        fetch(`${API_BASE}/api/v1/analytics/top-talkers?limit=10`).then(r => r.json()),
-        fetch(`${API_BASE}/api/v1/analytics/protocol-breakdown`).then(r => r.json()),
-        fetch(`${API_BASE}/api/v1/analytics/traffic-timeline?bucket_minutes=5`).then(r => r.json()),
-        fetch(`${API_BASE}/api/v1/analytics/threat-heatmap`).then(r => r.json()),
-        fetch(`${API_BASE}/api/v1/analytics/geo-summary`).then(r => r.json()),
+        safeFetch(`${API_BASE}/api/v1/analytics/top-talkers?limit=10`),
+        safeFetch(`${API_BASE}/api/v1/analytics/protocol-breakdown`),
+        safeFetch(`${API_BASE}/api/v1/analytics/traffic-timeline?bucket_minutes=5`),
+        safeFetch(`${API_BASE}/api/v1/analytics/threat-heatmap`),
+        safeFetch(`${API_BASE}/api/v1/analytics/geo-summary`),
       ]);
       setTopTalkers(tt.top_talkers || []);
       setProtocols(proto.protocols || []);

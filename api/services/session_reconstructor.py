@@ -205,7 +205,7 @@ class SessionReconstructor:
         for alert in self.log_store.alerts:
             a_ts = alert.timestamp or 0.0
             a_src = alert.src_ip
-            a_dst = alert.dest_ip
+            a_dst = alert.dst_ip
 
             for session in sessions:
                 ip_match = (a_src == session.src_ip and a_dst == session.dst_ip) or \

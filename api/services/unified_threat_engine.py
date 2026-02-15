@@ -253,7 +253,7 @@ class UnifiedThreatEngine:
         for alert_score in self._alerts:
             alert = alert_score.alert
             src_ip = alert.src_ip
-            dst_ip = alert.dest_ip
+            dst_ip = alert.dst_ip
 
             # Add to source profile
             if src_ip not in profiles:

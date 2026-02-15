@@ -189,7 +189,7 @@ class ThreatIntelService:
             async with httpx.AsyncClient(timeout=10.0) as client:
                 resp = await client.get(
                     "https://api.abuseipdb.com/api/v2/check",
-                    params={"ipAddress": ip, "maxAgeInDays": 90},
+                    params={"ipAddress": ip, "maxAgeInDays": 90, "verbose": ""},
                     headers={"Key": self.abuseipdb_key, "Accept": "application/json"},
                 )
                 if resp.status_code != 200:
@@ -198,7 +198,12 @@ class ThreatIntelService:
 
                 data = resp.json().get("data", {})
                 abuse_score = data.get("abuseConfidenceScore", 0)
-                categories = [str(c) for c in data.get("reports", [])] if data.get("totalReports", 0) > 0 else []
+                # Extract unique category IDs from verbose reports
+                cat_ids = set()
+                for report in data.get("reports", []):
+                    for cat_id in report.get("categories", []):
+                        cat_ids.add(cat_id)
+                categories = [str(c) for c in sorted(cat_ids)]
 
                 result = ThreatIntelResult(
                     indicator=ip,

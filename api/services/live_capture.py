@@ -10,6 +10,7 @@ import subprocess
 import tempfile
 import logging
 import time
+import threading
 from typing import Dict, Optional
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
@@ -39,6 +40,7 @@ class LiveCaptureService:
     def __init__(self):
         self._sessions: Dict[str, CaptureSession] = {}
         self._processes: Dict[str, subprocess.Popen] = {}
+        self._timers: Dict[str, threading.Timer] = {}
         self._capture_dir = tempfile.mkdtemp(prefix="brohunter_capture_")
 
     def get_interfaces(self) -> list:
@@ -87,7 +89,7 @@ class LiveCaptureService:
         # Build tcpdump command
         cmd = ["tcpdump", "-i", interface, "-w", pcap_path, "-c", str(max_packets)]
         if capture_filter:
-            cmd.extend(capture_filter.split())
+            cmd.extend(["--", capture_filter])
 
         session = CaptureSession(
             session_id=session_id,
@@ -108,6 +110,13 @@ class LiveCaptureService:
             self._sessions[session_id] = session
             logger.info(f"Started capture {session_id} on {interface} (PID {proc.pid})")
 
+            # Enforce max_seconds timeout
+            if max_seconds > 0:
+                timer = threading.Timer(max_seconds, self._timeout_stop, args=[session_id])
+                timer.daemon = True
+                timer.start()
+                self._timers[session_id] = timer
+
         except FileNotFoundError:
             session.status = "error"
             session.error = "tcpdump not found. Install with: apt install tcpdump"
@@ -125,11 +134,21 @@ class LiveCaptureService:
 
         return session
 
+    def _timeout_stop(self, session_id: str):
+        """Called by timer when max_seconds expires."""
+        logger.info(f"Capture {session_id} reached max time limit, stopping")
+        self.stop_capture(session_id)
+
     def stop_capture(self, session_id: str) -> Optional[CaptureSession]:
         """Stop a running capture session."""
         session = self._sessions.get(session_id)
         if not session:
             return None
+
+        # Cancel timeout timer if active
+        timer = self._timers.pop(session_id, None)
+        if timer:
+            timer.cancel()
 
         proc = self._processes.get(session_id)
         if proc and proc.poll() is None:

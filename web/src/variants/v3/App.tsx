@@ -12,6 +12,7 @@ import {
   Shield,
   Search,
   Globe,
+  ListTree,
   ArrowLeft,
   ChevronRight,
   PanelLeftClose,
@@ -27,6 +28,7 @@ import Beacons from './pages/Beacons';
 import DnsThreats from './pages/DnsThreats';
 import Threats from './pages/Threats';
 import HuntResults from './pages/HuntResults';
+import TimelinePage from './pages/Timeline';
 import './styles.css';
 
 const NAV_ITEMS = [
@@ -36,6 +38,7 @@ const NAV_ITEMS = [
   { to: '/3/dns', icon: Globe, label: 'DNS Threats', end: false },
   { to: '/3/threats', icon: Shield, label: 'Threats', end: false },
   { to: '/3/hunts', icon: Search, label: 'Hunt Results', end: false },
+  { to: '/3/timeline', icon: ListTree, label: 'Threat Timeline', end: false },
 ];
 
 const BREADCRUMB_MAP: Record<string, string> = {
@@ -45,6 +48,7 @@ const BREADCRUMB_MAP: Record<string, string> = {
   '/3/dns': 'DNS Threats',
   '/3/threats': 'Threats',
   '/3/hunts': 'Hunt Results',
+  '/3/timeline': 'Threat Timeline',
 };
 
 const Clock: React.FC = () => {
@@ -163,6 +167,7 @@ const V3App: React.FC = () => {
           <Route path="dns" element={<DnsThreats />} />
           <Route path="threats" element={<Threats />} />
           <Route path="hunts" element={<HuntResults />} />
+          <Route path="timeline" element={<TimelinePage />} />
           <Route path="*" element={<Navigate to="/3" replace />} />
         </Routes>
       </main>

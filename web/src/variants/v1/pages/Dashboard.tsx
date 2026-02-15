@@ -14,7 +14,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { StatCard } from '../../../components/data';
+import { StatCard, PcapUpload } from '../../../components/data';
 import { ThreatTimeline, SeverityDonut, ThreatHeatmap } from '../../../components/charts';
 import { AlertCard } from '../../../components/data';
 import {
@@ -249,6 +249,13 @@ const Dashboard: React.FC = () => {
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <div className="v1-panel">
+        <div className="v1-panel-header">PCAP Ingestion</div>
+        <div className="v1-panel-body">
+          <PcapUpload />
         </div>
       </div>
 

@@ -9,7 +9,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.config import settings
-from api.routers import analysis, logs, ingest, data, hunt, dns_threat
+from api.routers import analysis, logs, ingest, data, hunt, dns_threat, export, sessions, scoring
 
 logger = logging.getLogger(__name__)
 
@@ -74,6 +74,9 @@ app.include_router(ingest.router, prefix=f"{settings.api_prefix}/ingest", tags=[
 app.include_router(data.router, prefix=f"{settings.api_prefix}/data", tags=["data"])
 app.include_router(hunt.router, prefix=f"{settings.api_prefix}/hunt", tags=["hunt"])
 app.include_router(dns_threat.router, prefix=f"{settings.api_prefix}/hunt", tags=["dns-threats"])
+app.include_router(export.router, prefix=f"{settings.api_prefix}/export", tags=["export"])
+app.include_router(sessions.router, prefix=f"{settings.api_prefix}/sessions", tags=["sessions"])
+app.include_router(scoring.router, prefix=f"{settings.api_prefix}/scoring", tags=["scoring"])
 
 
 if __name__ == "__main__":

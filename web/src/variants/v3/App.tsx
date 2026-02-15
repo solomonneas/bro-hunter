@@ -27,6 +27,8 @@ import {
   FileText,
   Crosshair,
   Antenna,
+  Upload,
+  Settings as SettingsIcon,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { mockDashboardStats } from '../../data/mockData';
@@ -43,6 +45,10 @@ import Analytics from './pages/Analytics';
 import Intel from './pages/Intel';
 import Capture from './pages/Capture';
 import Reports from './pages/Reports';
+import Workflow from './pages/Workflow';
+import Settings from './pages/Settings';
+import GlobalSearch from '../../components/GlobalSearch';
+import NotificationToast from '../../components/NotificationToast';
 import './styles.css';
 
 interface V3AppProps {
@@ -65,6 +71,8 @@ function buildNav(base: string) {
     { to: `${b}/intel`, icon: Crosshair, label: 'Threat Intel', end: false },
     { to: `${b}/capture`, icon: Antenna, label: 'Live Capture', end: false },
     { to: `${b}/reports`, icon: FileText, label: 'Reports', end: false },
+    { to: `${b}/workflow`, icon: Upload, label: 'PCAP Workflow', end: false },
+    { to: `${b}/settings`, icon: SettingsIcon, label: 'Settings', end: false },
     { to: `${b}/tuning`, icon: Sliders, label: 'Tuning', end: false },
   ];
 }
@@ -73,8 +81,8 @@ function buildBreadcrumbs(base: string): Record<string, string> {
   const b = base === '/' ? '' : base;
   const map: Record<string, string> = {};
   map[base] = 'Dashboard';
-  const pages = ['connections', 'beacons', 'dns', 'threats', 'hunts', 'timeline', 'sessions', 'analytics', 'intel', 'capture', 'reports', 'tuning'];
-  const labels = ['Connections', 'Beacons', 'DNS Threats', 'Threats', 'Hunt Results', 'Threat Timeline', 'Sessions', 'Analytics', 'Threat Intel', 'Live Capture', 'Reports', 'Tuning'];
+  const pages = ['connections', 'beacons', 'dns', 'threats', 'hunts', 'timeline', 'sessions', 'analytics', 'intel', 'capture', 'reports', 'workflow', 'settings', 'tuning'];
+  const labels = ['Connections', 'Beacons', 'DNS Threats', 'Threats', 'Hunt Results', 'Threat Timeline', 'Sessions', 'Analytics', 'Threat Intel', 'Live Capture', 'Reports', 'PCAP Workflow', 'Settings', 'Tuning'];
   pages.forEach((p, i) => { map[`${b}/${p}`] = labels[i]; });
   return map;
 }
@@ -106,6 +114,8 @@ const V3App: React.FC<V3AppProps> = ({ basePath = '/' }) => {
 
   return (
     <div className={`v3-root${collapsed ? ' collapsed' : ''}`}>
+      <GlobalSearch />
+      <NotificationToast />
       {/* Sidebar */}
       <nav className="v3-sidebar" aria-label="Main navigation">
         <div className="v3-sidebar-brand">
@@ -160,13 +170,14 @@ const V3App: React.FC<V3AppProps> = ({ basePath = '/' }) => {
           </nav>
         </div>
 
-        <div className="v3-header-search">
+        <div className="v3-header-search" onClick={() => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))}>
           <Search size={14} aria-hidden="true" />
           <input
             type="text"
-            placeholder="Search IPs, domains, techniques…"
+            placeholder="Search (Ctrl+K)…"
             aria-label="Search IPs, domains, techniques"
             readOnly
+            style={{ cursor: 'pointer' }}
           />
         </div>
 
@@ -211,6 +222,8 @@ const V3App: React.FC<V3AppProps> = ({ basePath = '/' }) => {
           <Route path="intel" element={<Intel />} />
           <Route path="capture" element={<Capture />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="workflow" element={<Workflow />} />
+          <Route path="settings" element={<Settings />} />
           <Route path="tuning" element={<Tuning />} />
           <Route path="*" element={<Navigate to={homeLink} replace />} />
         </Routes>

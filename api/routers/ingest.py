@@ -12,6 +12,7 @@ import json
 import uuid
 import shutil
 import subprocess
+import tempfile
 
 from api.services.log_store import log_store
 from api.dependencies.auth import api_key_auth
@@ -23,7 +24,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 PCAP_MAX_SIZE_BYTES = 100 * 1024 * 1024
-PCAP_TEMP_ROOT = Path("/tmp/bro_hunter_pcaps")
+PCAP_TEMP_ROOT = Path(tempfile.gettempdir()) / "bro_hunter_pcaps"
 
 
 class IngestDirectoryRequest(BaseModel):
@@ -220,12 +221,19 @@ async def ingest_pcap(
                     )
                 f.write(chunk)
 
-        tshark_result = subprocess.run(
-            ["tshark", "-r", str(pcap_path), "-T", "json"],
-            capture_output=True,
-            text=True,
-            check=False,
-        )
+        try:
+            tshark_result = subprocess.run(
+                ["tshark", "-r", str(pcap_path), "-T", "json"],
+                capture_output=True,
+                text=True,
+                check=False,
+                timeout=300,
+            )
+        except subprocess.TimeoutExpired:
+            raise HTTPException(
+                status_code=status.HTTP_408_REQUEST_TIMEOUT,
+                detail="tshark processing timed out after 300 seconds. The PCAP may be too large.",
+            )
 
         if tshark_result.returncode != 0:
             raise HTTPException(
@@ -259,15 +267,15 @@ async def ingest_pcap(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Could not decode tshark output: {e}",
-        )
+        ) from e
     except HTTPException:
         raise
     except Exception as e:
         logger.error(f"PCAP ingestion failed: {e}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"PCAP ingestion failed: {str(e)}",
-        )
+            detail=f"PCAP ingestion failed: {e!s}",
+        ) from e
     finally:
         await file.close()
         shutil.rmtree(ingest_dir, ignore_errors=True)

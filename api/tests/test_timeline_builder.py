@@ -113,9 +113,10 @@ def test_build_timeline_generates_human_readable_events():
     now = store.connections[0].timestamp
     engine = MockThreatEngine(_mock_profiles(now))
 
-    events = build_timeline(store, engine, {"limit": 100, "offset": 0})
+    events, total = build_timeline(store, engine, {"limit": 100, "offset": 0})
 
     assert len(events) > 0
+    assert total >= len(events)
     summaries = [e.summary for e in events]
     assert any("10.0.0.5" in s and "45.33.32.156" in s for s in summaries)
     assert any(e.type == "threat" for e in events)
@@ -126,7 +127,7 @@ def test_build_timeline_clusters_rapid_events():
     now = store.connections[0].timestamp
     engine = MockThreatEngine(_mock_profiles(now))
 
-    events = build_timeline(store, engine, {"limit": 100, "offset": 0, "src_ip": "10.0.0.5", "dst_ip": "45.33.32.156"})
+    events, _ = build_timeline(store, engine, {"limit": 100, "offset": 0, "src_ip": "10.0.0.5", "dst_ip": "45.33.32.156"})
 
     assert any(e.type == "cluster" for e in events)
 
@@ -136,7 +137,8 @@ def test_build_timeline_applies_severity_filter():
     now = store.connections[0].timestamp
     engine = MockThreatEngine(_mock_profiles(now))
 
-    events = build_timeline(store, engine, {"limit": 100, "offset": 0, "severity_min": "high"})
+    events, total = build_timeline(store, engine, {"limit": 100, "offset": 0, "severity_min": "high"})
 
     assert len(events) > 0
+    assert total == len(events)  # no pagination offset, so total == len
     assert all(e.severity in {"high", "critical"} for e in events)

@@ -32,8 +32,11 @@ def _to_float(value: Any, default: float | None = None) -> float | None:
         return default
 
 
-def _to_timestamp(frame_layer: dict[str, Any]) -> datetime:
-    epoch = _to_float(frame_layer.get("frame.time_epoch"), 0.0) or 0.0
+def _to_timestamp(frame_layer: dict[str, Any]) -> datetime | None:
+    """Convert frame epoch to timezone-aware datetime, or None if missing/invalid."""
+    epoch = _to_float(frame_layer.get("frame.time_epoch"))
+    if epoch is None or epoch <= 0:
+        return None
     return datetime.fromtimestamp(epoch, tz=timezone.utc)
 
 
@@ -61,13 +64,29 @@ def convert_tshark_json(
         if not src_ip or not dst_ip:
             continue
 
-        is_tcp = bool(tcp)
-        proto = "tcp" if is_tcp else "udp"
-
-        src_port = _to_int(tcp.get("tcp.srcport") if is_tcp else udp.get("udp.srcport"), 0)
-        dst_port = _to_int(tcp.get("tcp.dstport") if is_tcp else udp.get("udp.dstport"), 0)
-
         timestamp = _to_timestamp(frame)
+        if timestamp is None:
+            continue
+
+        icmp = layers.get("icmp", {})
+        ip_proto = _to_int(ip.get("ip.proto"), 0)
+
+        if bool(tcp):
+            proto = "tcp"
+            src_port = _to_int(tcp.get("tcp.srcport"), 0)
+            dst_port = _to_int(tcp.get("tcp.dstport"), 0)
+        elif bool(udp):
+            proto = "udp"
+            src_port = _to_int(udp.get("udp.srcport"), 0)
+            dst_port = _to_int(udp.get("udp.dstport"), 0)
+        elif bool(icmp) or ip_proto == 1:
+            proto = "icmp"
+            src_port = 0
+            dst_port = 0
+        else:
+            proto = f"ip:{ip_proto}" if ip_proto else "other"
+            src_port = 0
+            dst_port = 0
         frame_number = _to_int(frame.get("frame.number"), idx + 1)
         uid = f"pcap-{frame_number}"
         frame_len = _to_int(frame.get("frame.len"), 0)
@@ -95,7 +114,7 @@ def convert_tshark_json(
                 timestamp=timestamp,
                 tags=["pcap"],
                 source=SOURCE,
-                conn_state=_first(tcp.get("tcp.flags.str")) if is_tcp else None,
+                conn_state=_first(tcp.get("tcp.flags.str")) if proto == "tcp" else None,
                 pkts_sent=1,
                 pkts_recv=0,
             )

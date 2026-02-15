@@ -48,7 +48,7 @@ def _severity_from_alert(alert: Alert) -> str:
 
 
 def _format_bytes(value: Optional[int]) -> str:
-    if not value:
+    if value is None or value <= 0:
         return "0 B"
     units = ["B", "KB", "MB", "GB"]
     size = float(value)
@@ -119,7 +119,7 @@ def _cluster_events(events: list[TimelineEvent], window_seconds: int = 5) -> lis
             if (
                 candidate.src_ip == current.src_ip
                 and candidate.dst_ip == current.dst_ip
-                and (candidate.timestamp - group[-1].timestamp).total_seconds() <= window_seconds
+                and (candidate.timestamp - group[0].timestamp).total_seconds() <= window_seconds
             ):
                 group.append(candidate)
                 j += 1
@@ -241,9 +241,11 @@ def build_timeline(log_store, threat_engine, filters: dict[str, Any] | TimelineF
     events = _cluster_events(events, window_seconds=5)
     events = _apply_filters(events, tf)
 
+    total_count = len(events)
+
     if tf.offset:
         events = events[tf.offset:]
     if tf.limit:
         events = events[:tf.limit]
 
-    return events
+    return events, total_count

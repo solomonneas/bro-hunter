@@ -328,7 +328,7 @@ async def get_timeline(
     """Get merged connection/DNS/alert/threat narrative timeline."""
     try:
         threat_engine = UnifiedThreatEngine(log_store)
-        events = build_timeline(
+        events, total_count = build_timeline(
             log_store,
             threat_engine,
             {
@@ -343,10 +343,10 @@ async def get_timeline(
         )
 
         return {
-            "total": len(events),
+            "total": total_count,
             "limit": limit,
             "offset": offset,
-            "events": [event.dict() for event in events],
+            "events": [event.model_dump() for event in events],
         }
 
     except Exception as e:

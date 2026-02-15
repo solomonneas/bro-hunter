@@ -3,7 +3,8 @@ import { PcapUpload } from '../../../components/data';
 import { ThreatNarrative } from '../../../components/charts';
 
 const TimelinePage: React.FC = () => {
-  const [hasData, setHasData] = useState(false);
+  const [uploadCount, setUploadCount] = useState(0);
+  const hasData = uploadCount > 0;
 
   return (
     <div className="space-y-4">
@@ -14,7 +15,7 @@ const TimelinePage: React.FC = () => {
         </p>
       </div>
 
-      <PcapUpload onComplete={() => setHasData(true)} />
+      <PcapUpload onComplete={() => setUploadCount((c) => c + 1)} />
 
       <div className="v3-card" style={{ padding: 16 }}>
         {!hasData && (
@@ -22,7 +23,7 @@ const TimelinePage: React.FC = () => {
             No uploaded dataset yet. Upload a PCAP above to generate timeline events.
           </p>
         )}
-        <ThreatNarrative />
+        {hasData && <ThreatNarrative key={uploadCount} />}
       </div>
     </div>
   );

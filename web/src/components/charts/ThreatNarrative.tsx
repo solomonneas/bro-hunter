@@ -34,7 +34,7 @@ const typeIcon = {
 
 const ThreatNarrative: React.FC = () => {
   const [events, setEvents] = useState<TimelineEvent[]>([]);
-  const [expanded, setExpanded] = useState<Record<number, boolean>>({});
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [severity, setSeverity] = useState<Severity | ''>('');
   const [ip, setIp] = useState('');
   const [timeStart, setTimeStart] = useState('');
@@ -43,19 +43,27 @@ const ThreatNarrative: React.FC = () => {
   const [sortDesc, setSortDesc] = useState(true);
 
   const fetchEvents = async (append = false) => {
-    const qs = new URLSearchParams({ limit: '50', offset: String(offset) });
-    if (severity) qs.set('severity_min', severity);
-    if (ip) {
-      qs.set('src_ip', ip);
-      qs.set('dst_ip', ip);
-    }
-    if (timeStart) qs.set('time_start', new Date(timeStart).toISOString());
-    if (timeEnd) qs.set('time_end', new Date(timeEnd).toISOString());
+    try {
+      const qs = new URLSearchParams({ limit: '50', offset: String(offset) });
+      if (severity) qs.set('severity_min', severity);
+      if (ip) {
+        qs.set('src_ip', ip);
+        qs.set('dst_ip', ip);
+      }
+      if (timeStart) qs.set('time_start', new Date(timeStart).toISOString());
+      if (timeEnd) qs.set('time_end', new Date(timeEnd).toISOString());
 
-    const res = await fetch(`${API_BASE}/api/data/timeline?${qs.toString()}`);
-    const payload = await res.json();
-    const incoming = (payload.events || []) as TimelineEvent[];
-    setEvents((prev) => (append ? [...prev, ...incoming] : incoming));
+      const res = await fetch(`${API_BASE}/api/data/timeline?${qs.toString()}`);
+      if (!res.ok) {
+        console.error(`Timeline fetch failed: ${res.status} ${res.statusText}`);
+        return;
+      }
+      const payload = await res.json();
+      const incoming = (payload.events ?? []) as TimelineEvent[];
+      setEvents((prev) => (append ? [...prev, ...incoming] : incoming));
+    } catch (err) {
+      console.error('Timeline fetch error:', err);
+    }
   };
 
   useEffect(() => {
@@ -95,34 +103,37 @@ const ThreatNarrative: React.FC = () => {
       </div>
 
       <div className="space-y-2">
-        {sorted.map((event, idx) => (
-          <div key={`${event.timestamp}-${idx}`} className={`border-l-4 rounded border border-gray-700 p-3 bg-background ${severityStyles[event.severity]}`}>
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-2 text-xs">
-                {typeIcon[event.type]}
-                <span>{new Date(event.timestamp).toLocaleString()}</span>
-                <span className="uppercase">{event.type}</span>
-                <span className="px-1.5 py-0.5 border border-current rounded">{event.severity}</span>
+        {sorted.map((event) => {
+          const stableKey = `${event.timestamp}-${event.type}-${event.src_ip ?? ''}-${event.dst_ip ?? ''}`;
+          return (
+            <div key={stableKey} className={`border-l-4 rounded border border-gray-700 p-3 bg-background ${severityStyles[event.severity]}`}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 text-xs">
+                  {typeIcon[event.type]}
+                  <span>{new Date(event.timestamp).toLocaleString()}</span>
+                  <span className="uppercase">{event.type}</span>
+                  <span className="px-1.5 py-0.5 border border-current rounded">{event.severity}</span>
+                </div>
+                <button onClick={() => setExpanded((p) => ({ ...p, [stableKey]: !p[stableKey] }))}>
+                  {expanded[stableKey] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </button>
               </div>
-              <button onClick={() => setExpanded((p) => ({ ...p, [idx]: !p[idx] }))}>
-                {expanded[idx] ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-              </button>
-            </div>
-            <p className="text-sm mt-1 text-gray-200">{event.summary}</p>
-            {(event.src_ip || event.dst_ip) && (
-              <p className="text-xs text-gray-400 mt-1">{event.src_ip || 'n/a'} → {event.dst_ip || 'n/a'}</p>
-            )}
+              <p className="text-sm mt-1 text-gray-200">{event.summary}</p>
+              {(event.src_ip || event.dst_ip) && (
+                <p className="text-xs text-gray-400 mt-1">{event.src_ip || 'n/a'} → {event.dst_ip || 'n/a'}</p>
+              )}
 
-            {expanded[idx] && (
-              <div className="mt-2 text-xs text-gray-400 space-y-1">
-                {event.mitre_techniques.length > 0 && (
-                  <div>MITRE: {event.mitre_techniques.join(', ')}</div>
-                )}
-                <pre className="bg-surface p-2 rounded overflow-x-auto text-[10px]">{JSON.stringify(event.details, null, 2)}</pre>
-              </div>
-            )}
-          </div>
-        ))}
+              {expanded[stableKey] && (
+                <div className="mt-2 text-xs text-gray-400 space-y-1">
+                  {event.mitre_techniques.length > 0 && (
+                    <div>MITRE: {event.mitre_techniques.join(', ')}</div>
+                  )}
+                  <pre className="bg-surface p-2 rounded overflow-x-auto text-[10px]">{JSON.stringify(event.details, null, 2)}</pre>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
       <button onClick={() => setOffset((o) => o + 50)} className="text-xs px-3 py-1.5 border border-gray-700 rounded hover:border-accent-cyan">

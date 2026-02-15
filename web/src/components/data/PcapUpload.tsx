@@ -2,6 +2,7 @@ import React, { useRef, useState } from 'react';
 
 const MAX_SIZE_BYTES = 100 * 1024 * 1024;
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const AUTH_TOKEN = import.meta.env.VITE_API_TOKEN || '';
 
 type UploadState = 'idle' | 'uploading' | 'parsing' | 'analyzing' | 'done' | 'error';
 
@@ -58,6 +59,9 @@ const PcapUpload: React.FC<PcapUploadProps> = ({ onComplete }) => {
 
       const xhr = new XMLHttpRequest();
       xhr.open('POST', `${API_BASE}/api/ingest/pcap`);
+      if (AUTH_TOKEN) {
+        xhr.setRequestHeader('Authorization', `Bearer ${AUTH_TOKEN}`);
+      }
 
       xhr.upload.onprogress = (event) => {
         if (event.lengthComputable) {

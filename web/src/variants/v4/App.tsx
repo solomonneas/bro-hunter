@@ -27,12 +27,12 @@ import HuntResults from './pages/HuntResults';
 import './styles.css';
 
 const NAV_ITEMS = [
-  { to: '/4', icon: LayoutDashboard, label: 'Dashboard', end: true },
-  { to: '/4/connections', icon: Network, label: 'Connections', end: false },
-  { to: '/4/beacons', icon: Radio, label: 'Beacons', end: false },
-  { to: '/4/dns', icon: Globe, label: 'DNS Intel', end: false },
-  { to: '/4/threats', icon: Shield, label: 'Threats', end: false },
-  { to: '/4/hunts', icon: Search, label: 'Hunt Ops', end: false },
+  { to: '/dev/4', icon: LayoutDashboard, label: 'Dashboard', end: true },
+  { to: '/dev/4/connections', icon: Network, label: 'Connections', end: false },
+  { to: '/dev/4/beacons', icon: Radio, label: 'Beacons', end: false },
+  { to: '/dev/4/dns', icon: Globe, label: 'DNS Intel', end: false },
+  { to: '/dev/4/threats', icon: Shield, label: 'Threats', end: false },
+  { to: '/dev/4/hunts', icon: Search, label: 'Hunt Ops', end: false },
 ];
 
 const NeonClock: React.FC = () => {
@@ -55,7 +55,7 @@ const V4App: React.FC = () => {
     <div className="v4-root">
       {/* Angular Top Nav */}
       <nav className="v4-nav" aria-label="Main navigation">
-        <Link to="/4" className="v4-nav-brand" aria-label="Bro Hunter home">
+        <Link to="/dev/4" className="v4-nav-brand" aria-label="Bro Hunter home">
           <Zap size={20} aria-hidden="true" />
           <span className="v4-nav-brand-text">Bro Hunter</span>
         </Link>
@@ -106,7 +106,7 @@ const V4App: React.FC = () => {
             <AlertTriangle size={12} aria-hidden="true" />
             {critCount} CRITICAL
           </div>
-          <Link to="/" className="v4-nav-back" aria-label="Back to all variants">
+          <Link to="/dev" className="v4-nav-back" aria-label="Back to all variants">
             <ArrowLeft size={12} aria-hidden="true" />
             EXIT
           </Link>
@@ -122,7 +122,7 @@ const V4App: React.FC = () => {
           <Route path="dns" element={<DnsThreats />} />
           <Route path="threats" element={<Threats />} />
           <Route path="hunts" element={<HuntResults />} />
-          <Route path="*" element={<Navigate to="/4" replace />} />
+          <Route path="*" element={<Navigate to="/dev/4" replace />} />
         </Routes>
       </main>
     </div>

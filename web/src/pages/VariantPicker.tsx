@@ -64,7 +64,7 @@ export const VariantPicker: React.FC = () => {
     const handleKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       const num = parseInt(e.key);
-      if (num >= 1 && num <= 5) navigate(`/${num}`);
+      if (num >= 1 && num <= 5) navigate(`/dev/${num}`);
     };
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
@@ -97,7 +97,7 @@ export const VariantPicker: React.FC = () => {
           {VARIANTS.map((v) => (
             <button
               key={v.id}
-              onClick={() => navigate(`/${v.id}`)}
+              onClick={() => navigate(`/dev/${v.id}`)}
               aria-label={`Open variant ${v.id}: ${v.name}`}
               className={`group text-left rounded-xl border ${v.borderColor} bg-gradient-to-br ${v.gradient} p-5 transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-black/30 focus:outline-none focus:ring-2 focus:ring-accent-cyan/50`}
               role="listitem"

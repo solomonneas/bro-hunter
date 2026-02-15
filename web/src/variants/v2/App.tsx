@@ -25,12 +25,12 @@ import HuntResults from './pages/HuntResults';
 import './styles.css';
 
 const NAV_ITEMS = [
-  { to: '/2', icon: LayoutDashboard, label: 'sys_report', end: true },
-  { to: '/2/connections', icon: Network, label: 'conn_dump', end: false },
-  { to: '/2/beacons', icon: Radio, label: 'beacon_scan', end: false },
-  { to: '/2/dns', icon: Globe, label: 'dns_intel', end: false },
-  { to: '/2/threats', icon: Shield, label: 'threat_map', end: false },
-  { to: '/2/hunts', icon: Search, label: 'hunt_log', end: false },
+  { to: '/dev/2', icon: LayoutDashboard, label: 'sys_report', end: true },
+  { to: '/dev/2/connections', icon: Network, label: 'conn_dump', end: false },
+  { to: '/dev/2/beacons', icon: Radio, label: 'beacon_scan', end: false },
+  { to: '/dev/2/dns', icon: Globe, label: 'dns_intel', end: false },
+  { to: '/dev/2/threats', icon: Shield, label: 'threat_map', end: false },
+  { to: '/dev/2/hunts', icon: Search, label: 'hunt_log', end: false },
 ];
 
 const Uptime: React.FC = () => {
@@ -79,7 +79,7 @@ const V2App: React.FC = () => {
         </div>
 
         <div className="v2-sidebar-footer">
-          <Link to="/" aria-label="Back to all variants">
+          <Link to="/dev" aria-label="Back to all variants">
             <ArrowLeft size={14} aria-hidden="true" />
             exit_variant
           </Link>
@@ -116,7 +116,7 @@ const V2App: React.FC = () => {
           <Route path="dns" element={<DnsThreats />} />
           <Route path="threats" element={<Threats />} />
           <Route path="hunts" element={<HuntResults />} />
-          <Route path="*" element={<Navigate to="/2" replace />} />
+          <Route path="*" element={<Navigate to="/dev/2" replace />} />
         </Routes>
       </main>
     </div>

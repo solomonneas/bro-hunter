@@ -25,12 +25,12 @@ import HuntResults from './pages/HuntResults';
 import './styles.css';
 
 const NAV_ITEMS = [
-  { to: '/1', icon: LayoutDashboard, label: 'Dashboard', end: true },
-  { to: '/1/connections', icon: Network, label: 'Connections', end: false },
-  { to: '/1/beacons', icon: Radio, label: 'Beacons', end: false },
-  { to: '/1/dns', icon: Globe, label: 'DNS Threats', end: false },
-  { to: '/1/threats', icon: Shield, label: 'Threats', end: false },
-  { to: '/1/hunts', icon: Search, label: 'Hunt Results', end: false },
+  { to: '/dev/1', icon: LayoutDashboard, label: 'Dashboard', end: true },
+  { to: '/dev/1/connections', icon: Network, label: 'Connections', end: false },
+  { to: '/dev/1/beacons', icon: Radio, label: 'Beacons', end: false },
+  { to: '/dev/1/dns', icon: Globe, label: 'DNS Threats', end: false },
+  { to: '/dev/1/threats', icon: Shield, label: 'Threats', end: false },
+  { to: '/dev/1/hunts', icon: Search, label: 'Hunt Results', end: false },
 ];
 
 const Clock: React.FC = () => {
@@ -78,7 +78,7 @@ const V1App: React.FC = () => {
         </div>
 
         <div className="v1-sidebar-footer">
-          <Link to="/" aria-label="Back to all variants">
+          <Link to="/dev" aria-label="Back to all variants">
             <ArrowLeft size={16} aria-hidden="true" />
             <span className="v1-nav-label">All Variants</span>
           </Link>
@@ -112,7 +112,7 @@ const V1App: React.FC = () => {
           <Route path="dns" element={<DnsThreats />} />
           <Route path="threats" element={<Threats />} />
           <Route path="hunts" element={<HuntResults />} />
-          <Route path="*" element={<Navigate to="/1" replace />} />
+          <Route path="*" element={<Navigate to="/dev/1" replace />} />
         </Routes>
       </main>
     </div>

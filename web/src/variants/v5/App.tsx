@@ -23,12 +23,12 @@ import HuntResults from './pages/HuntResults';
 import './styles.css';
 
 const NAV_ITEMS = [
-  { to: '/5', icon: LayoutDashboard, label: 'Overview', end: true },
-  { to: '/5/connections', icon: Network, label: 'Connections', end: false },
-  { to: '/5/beacons', icon: Radio, label: 'Beacons', end: false },
-  { to: '/5/dns', icon: Globe, label: 'DNS', end: false },
-  { to: '/5/threats', icon: Shield, label: 'Threats', end: false },
-  { to: '/5/hunts', icon: Search, label: 'Intelligence', end: false },
+  { to: '/dev/5', icon: LayoutDashboard, label: 'Overview', end: true },
+  { to: '/dev/5/connections', icon: Network, label: 'Connections', end: false },
+  { to: '/dev/5/beacons', icon: Radio, label: 'Beacons', end: false },
+  { to: '/dev/5/dns', icon: Globe, label: 'DNS', end: false },
+  { to: '/dev/5/threats', icon: Shield, label: 'Threats', end: false },
+  { to: '/dev/5/hunts', icon: Search, label: 'Intelligence', end: false },
 ];
 
 const V5App: React.FC = () => {
@@ -37,7 +37,7 @@ const V5App: React.FC = () => {
       {/* Horizontal top nav */}
       <nav className="v5-nav" aria-label="Main navigation">
         <div className="v5-nav-inner">
-          <Link to="/5" className="v5-nav-brand" aria-label="Bro Hunter home">
+          <Link to="/dev/5" className="v5-nav-brand" aria-label="Bro Hunter home">
             Bro Hunter
           </Link>
 
@@ -57,7 +57,7 @@ const V5App: React.FC = () => {
             ))}
           </div>
 
-          <Link to="/" className="v5-nav-back" aria-label="Back to all variants">
+          <Link to="/dev" className="v5-nav-back" aria-label="Back to all variants">
             <ArrowLeft size={14} aria-hidden="true" />
             Variants
           </Link>
@@ -73,7 +73,7 @@ const V5App: React.FC = () => {
           <Route path="dns" element={<DnsThreats />} />
           <Route path="threats" element={<Threats />} />
           <Route path="hunts" element={<HuntResults />} />
-          <Route path="*" element={<Navigate to="/5" replace />} />
+          <Route path="*" element={<Navigate to="/dev/5" replace />} />
         </Routes>
       </main>
     </div>

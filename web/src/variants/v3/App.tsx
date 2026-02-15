@@ -2,6 +2,8 @@
  * Variant 3: Corporate SOC / Enterprise SIEM
  * Professional enterprise layout with collapsible sidebar, header, breadcrumbs.
  * Splunk/Elastic-inspired clean aesthetic.
+ *
+ * Now the primary (and only shipped) variant. Other variants live under /dev/N for development only.
  */
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, NavLink, Navigate, Link, useLocation } from 'react-router-dom';
@@ -43,37 +45,39 @@ import Capture from './pages/Capture';
 import Reports from './pages/Reports';
 import './styles.css';
 
-const NAV_ITEMS = [
-  { to: '/3', icon: LayoutDashboard, label: 'Dashboard', end: true },
-  { to: '/3/connections', icon: Network, label: 'Connections', end: false },
-  { to: '/3/beacons', icon: Radio, label: 'Beacons', end: false },
-  { to: '/3/dns', icon: Globe, label: 'DNS Threats', end: false },
-  { to: '/3/threats', icon: Shield, label: 'Threats', end: false },
-  { to: '/3/hunts', icon: Search, label: 'Hunt Results', end: false },
-  { to: '/3/timeline', icon: ListTree, label: 'Threat Timeline', end: false },
-  { to: '/3/sessions', icon: Link2, label: 'Sessions', end: false },
-  { to: '/3/analytics', icon: BarChart3, label: 'Analytics', end: false },
-  { to: '/3/intel', icon: Crosshair, label: 'Threat Intel', end: false },
-  { to: '/3/capture', icon: Antenna, label: 'Live Capture', end: false },
-  { to: '/3/reports', icon: FileText, label: 'Reports', end: false },
-  { to: '/3/tuning', icon: Sliders, label: 'Tuning', end: false },
-];
+interface V3AppProps {
+  /** Base path prefix for routes. '/' in production, '/dev/3' in dev mode. */
+  basePath?: string;
+}
 
-const BREADCRUMB_MAP: Record<string, string> = {
-  '/3': 'Dashboard',
-  '/3/connections': 'Connections',
-  '/3/beacons': 'Beacons',
-  '/3/dns': 'DNS Threats',
-  '/3/threats': 'Threats',
-  '/3/hunts': 'Hunt Results',
-  '/3/timeline': 'Threat Timeline',
-  '/3/sessions': 'Sessions',
-  '/3/analytics': 'Analytics',
-  '/3/intel': 'Threat Intel',
-  '/3/capture': 'Live Capture',
-  '/3/reports': 'Reports',
-  '/3/tuning': 'Tuning',
-};
+function buildNav(base: string) {
+  const b = base === '/' ? '' : base;
+  return [
+    { to: base, icon: LayoutDashboard, label: 'Dashboard', end: true },
+    { to: `${b}/connections`, icon: Network, label: 'Connections', end: false },
+    { to: `${b}/beacons`, icon: Radio, label: 'Beacons', end: false },
+    { to: `${b}/dns`, icon: Globe, label: 'DNS Threats', end: false },
+    { to: `${b}/threats`, icon: Shield, label: 'Threats', end: false },
+    { to: `${b}/hunts`, icon: Search, label: 'Hunt Results', end: false },
+    { to: `${b}/timeline`, icon: ListTree, label: 'Threat Timeline', end: false },
+    { to: `${b}/sessions`, icon: Link2, label: 'Sessions', end: false },
+    { to: `${b}/analytics`, icon: BarChart3, label: 'Analytics', end: false },
+    { to: `${b}/intel`, icon: Crosshair, label: 'Threat Intel', end: false },
+    { to: `${b}/capture`, icon: Antenna, label: 'Live Capture', end: false },
+    { to: `${b}/reports`, icon: FileText, label: 'Reports', end: false },
+    { to: `${b}/tuning`, icon: Sliders, label: 'Tuning', end: false },
+  ];
+}
+
+function buildBreadcrumbs(base: string): Record<string, string> {
+  const b = base === '/' ? '' : base;
+  const map: Record<string, string> = {};
+  map[base] = 'Dashboard';
+  const pages = ['connections', 'beacons', 'dns', 'threats', 'hunts', 'timeline', 'sessions', 'analytics', 'intel', 'capture', 'reports', 'tuning'];
+  const labels = ['Connections', 'Beacons', 'DNS Threats', 'Threats', 'Hunt Results', 'Threat Timeline', 'Sessions', 'Analytics', 'Threat Intel', 'Live Capture', 'Reports', 'Tuning'];
+  pages.forEach((p, i) => { map[`${b}/${p}`] = labels[i]; });
+  return map;
+}
 
 const Clock: React.FC = () => {
   const [now, setNow] = useState(new Date());
@@ -88,12 +92,17 @@ const Clock: React.FC = () => {
   );
 };
 
-const V3App: React.FC = () => {
+const V3App: React.FC<V3AppProps> = ({ basePath = '/' }) => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
   const critCount = mockDashboardStats.criticalAlerts;
 
+  const NAV_ITEMS = buildNav(basePath);
+  const BREADCRUMB_MAP = buildBreadcrumbs(basePath);
+  const isDevMode = basePath !== '/';
+
   const currentPage = BREADCRUMB_MAP[location.pathname] || 'Dashboard';
+  const homeLink = basePath;
 
   return (
     <div className={`v3-root${collapsed ? ' collapsed' : ''}`}>
@@ -132,10 +141,12 @@ const V3App: React.FC = () => {
             {collapsed ? <PanelLeftOpen size={16} aria-hidden="true" /> : <PanelLeftClose size={16} aria-hidden="true" />}
             {!collapsed && <span>Collapse</span>}
           </button>
-          <Link to="/" aria-label="Back to all variants">
-            <ArrowLeft size={14} aria-hidden="true" />
-            {!collapsed && <span>All Variants</span>}
-          </Link>
+          {isDevMode && (
+            <Link to="/dev" aria-label="Back to dev variants">
+              <ArrowLeft size={14} aria-hidden="true" />
+              {!collapsed && <span>Dev Variants</span>}
+            </Link>
+          )}
         </div>
       </nav>
 
@@ -143,7 +154,7 @@ const V3App: React.FC = () => {
       <header className="v3-header">
         <div className="v3-header-left">
           <nav className="v3-breadcrumb" aria-label="Breadcrumb">
-            <Link to="/3">SOC</Link>
+            <Link to={homeLink}>SOC</Link>
             <ChevronRight size={12} className="v3-breadcrumb-sep" aria-hidden="true" />
             <span className="v3-breadcrumb-current" aria-current="page">{currentPage}</span>
           </nav>
@@ -161,6 +172,9 @@ const V3App: React.FC = () => {
 
         <div className="v3-header-right">
           <Clock />
+          {isDevMode && (
+            <span className="text-xs px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-400 font-mono">DEV</span>
+          )}
           <div
             role="status"
             aria-label={`${critCount} critical alerts`}
@@ -198,7 +212,7 @@ const V3App: React.FC = () => {
           <Route path="capture" element={<Capture />} />
           <Route path="reports" element={<Reports />} />
           <Route path="tuning" element={<Tuning />} />
-          <Route path="*" element={<Navigate to="/3" replace />} />
+          <Route path="*" element={<Navigate to={homeLink} replace />} />
         </Routes>
       </main>
     </div>

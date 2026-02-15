@@ -10,6 +10,8 @@ from collections import Counter
 import logging
 
 from api.services.log_store import log_store
+from api.services.unified_threat_engine import UnifiedThreatEngine
+from api.services.timeline_builder import build_timeline
 from api.parsers.unified import Connection, DnsQuery, Alert
 from api.dependencies.auth import api_key_auth
 
@@ -311,32 +313,40 @@ async def get_alerts(
 @router.get(
     "/timeline",
     summary="Get timeline data",
-    description="Get connection timeline for visualization",
+    description="Get unified chronological timeline for network and threat events",
 )
 async def get_timeline(
     _: Annotated[str, Depends(api_key_auth)],
-    interval: str = Query("hour", description="Time interval (hour, day)"),
-    limit: int = Query(100, ge=1, le=500, description="Maximum data points"),
+    limit: int = Query(100, ge=1, le=500, description="Maximum events"),
+    offset: int = Query(0, ge=0, le=100000, description="Pagination offset"),
+    severity_min: Optional[str] = Query(None, description="Minimum severity: info|low|medium|high|critical"),
+    src_ip: Optional[str] = Query(None, description="Filter by source IP"),
+    dst_ip: Optional[str] = Query(None, description="Filter by destination IP"),
+    time_start: Optional[datetime] = Query(None, description="Start time (ISO-8601)"),
+    time_end: Optional[datetime] = Query(None, description="End time (ISO-8601)"),
 ) -> dict:
-    """
-    Get connection timeline data for visualization.
-
-    Aggregates connections into time buckets for timeline charts.
-
-    Args:
-        interval: Time bucket size (hour or day)
-        limit: Maximum number of buckets
-
-    Returns:
-        Timeline data with timestamps and connection counts
-    """
+    """Get merged connection/DNS/alert/threat narrative timeline."""
     try:
-        # This is a simplified implementation
-        # In production, you'd use proper time bucketing
+        threat_engine = UnifiedThreatEngine(log_store)
+        events, total_count = build_timeline(
+            log_store,
+            threat_engine,
+            {
+                "limit": limit,
+                "offset": offset,
+                "severity_min": severity_min,
+                "src_ip": src_ip,
+                "dst_ip": dst_ip,
+                "time_start": time_start,
+                "time_end": time_end,
+            },
+        )
+
         return {
-            "interval": interval,
-            "data": [],
-            "message": "Timeline endpoint - implementation in progress",
+            "total": total_count,
+            "limit": limit,
+            "offset": offset,
+            "events": [event.model_dump() for event in events],
         }
 
     except Exception as e:

@@ -19,6 +19,8 @@ import {
   PanelLeftOpen,
   Bell,
   ShieldCheck,
+  Sliders,
+  Link2,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { mockDashboardStats } from '../../data/mockData';
@@ -29,6 +31,8 @@ import DnsThreats from './pages/DnsThreats';
 import Threats from './pages/Threats';
 import HuntResults from './pages/HuntResults';
 import TimelinePage from './pages/Timeline';
+import Sessions from './pages/Sessions';
+import Tuning from './pages/Tuning';
 import './styles.css';
 
 const NAV_ITEMS = [
@@ -39,6 +43,8 @@ const NAV_ITEMS = [
   { to: '/3/threats', icon: Shield, label: 'Threats', end: false },
   { to: '/3/hunts', icon: Search, label: 'Hunt Results', end: false },
   { to: '/3/timeline', icon: ListTree, label: 'Threat Timeline', end: false },
+  { to: '/3/sessions', icon: Link2, label: 'Sessions', end: false },
+  { to: '/3/tuning', icon: Sliders, label: 'Tuning', end: false },
 ];
 
 const BREADCRUMB_MAP: Record<string, string> = {
@@ -49,6 +55,8 @@ const BREADCRUMB_MAP: Record<string, string> = {
   '/3/threats': 'Threats',
   '/3/hunts': 'Hunt Results',
   '/3/timeline': 'Threat Timeline',
+  '/3/sessions': 'Sessions',
+  '/3/tuning': 'Tuning',
 };
 
 const Clock: React.FC = () => {
@@ -168,6 +176,8 @@ const V3App: React.FC = () => {
           <Route path="threats" element={<Threats />} />
           <Route path="hunts" element={<HuntResults />} />
           <Route path="timeline" element={<TimelinePage />} />
+          <Route path="sessions" element={<Sessions />} />
+          <Route path="tuning" element={<Tuning />} />
           <Route path="*" element={<Navigate to="/3" replace />} />
         </Routes>
       </main>

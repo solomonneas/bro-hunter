@@ -35,7 +35,6 @@ import {
   X,
 } from 'lucide-react';
 import { format } from 'date-fns';
-import { mockDashboardStats } from '../../data/mockData';
 import Dashboard from './pages/Dashboard';
 import Connections from './pages/Connections';
 import Beacons from './pages/Beacons';
@@ -58,6 +57,8 @@ import Packets from './pages/Packets';
 import GlobalSearch from '../../components/GlobalSearch';
 import NotificationToast from '../../components/NotificationToast';
 import './styles.css';
+
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 interface V3AppProps {
   /** Base path prefix for routes. '/' in production, '/dev/3' in dev mode. */
@@ -115,12 +116,26 @@ const Clock: React.FC = () => {
 const V3App: React.FC<V3AppProps> = ({ basePath = '/' }) => {
   const [collapsed, setCollapsed] = useState(false);
   const location = useLocation();
-  const critCount = mockDashboardStats.criticalAlerts;
+  const [critCount, setCritCount] = useState(0);
 
   const NAV_ITEMS = buildNav(basePath);
   const BREADCRUMB_MAP = buildBreadcrumbs(basePath);
   const [mobileNav, setMobileNav] = useState(false);
   const closeMobileNav = useCallback(() => setMobileNav(false), []);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const res = await fetch(`${API_BASE}/api/v1/analytics/threat-heatmap`);
+        if (!res.ok) return;
+        const data = await res.json();
+        const critical = (data?.heatmap || []).filter((entry: any) => (entry?.threat_score || 0) >= 0.75).length;
+        setCritCount(critical);
+      } catch (error) {
+        console.error('Failed to fetch critical alert count', error);
+      }
+    })();
+  }, []);
 
   // Close mobile nav on route change
   useEffect(() => { setMobileNav(false); }, [location.pathname]);

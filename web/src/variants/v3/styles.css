@@ -992,13 +992,13 @@
   .v3-col-6 { grid-column: span 12; }
 
   /* Mobile: hide sidebar, full-width content */
-  .v3-layout {
+  .v3-root {
     grid-template-columns: 1fr;
     grid-template-areas:
       "header"
-      "main";
+      "content";
   }
-  .v3-layout.collapsed {
+  .v3-root.collapsed {
     grid-template-columns: 1fr;
   }
   .v3-sidebar {
@@ -1010,13 +1010,87 @@
   .v3-header {
     padding: 0 12px;
   }
-  .v3-main,
+  .v3-header-search {
+    display: none;
+  }
+  .v3-header-time {
+    display: none;
+  }
+  .v3-header-right {
+    gap: 8px;
+  }
   .v3-content {
     padding: 12px;
     overflow-x: hidden;
   }
   .v3-breadcrumb {
     font-size: 12px;
+  }
+  .v3-kpi-value {
+    font-size: 22px;
+  }
+  .v3-card {
+    padding: 14px;
+  }
+  .v3-table-wrapper {
+    font-size: 12px;
+  }
+  .v3-table td,
+  .v3-table th {
+    padding: 8px 10px;
+  }
+}
+
+/* ============================================================================
+   Page Titles
+   ============================================================================ */
+
+.v3-page-title {
+  font-size: 28px;
+}
+
+.v3-page-subtitle {
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .v3-page-title {
+    font-size: 20px;
+  }
+  .v3-page-subtitle {
+    font-size: 12px;
+  }
+}
+
+/* ============================================================================
+   Dashboard Stat Cards
+   ============================================================================ */
+
+.v3-stat-card-label {
+  font-size: 12px;
+  color: #64748B;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.v3-stat-card-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #1E293B;
+  line-height: 1.1;
+}
+
+@media (max-width: 768px) {
+  .v3-stat-card-label {
+    font-size: 10px;
+    margin-bottom: 4px;
+  }
+  .v3-stat-card-value {
+    font-size: 20px;
+  }
+  .v3-stat-card {
+    padding: 10px 12px !important;
   }
 }
 
@@ -1087,10 +1161,10 @@
   border-right: 1px solid rgba(255,255,255,0.1);
   overflow-y: auto;
   z-index: 10000;
-  animation: v3-slide-in 0.2s ease;
+  animation: v3-mobile-slide-in 0.2s ease;
 }
 
-@keyframes v3-slide-in {
+@keyframes v3-mobile-slide-in {
   from { transform: translateX(-100%); }
   to { transform: translateX(0); }
 }

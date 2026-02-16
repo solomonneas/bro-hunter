@@ -161,8 +161,8 @@ const Dashboard: React.FC = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div>
-        <h1 style={{ margin: 0, color: 'var(--v3-text)', fontSize: 28, fontWeight: 700 }}>Security Dashboard</h1>
-        <p style={{ margin: '4px 0 0', color: 'var(--v3-text-secondary)', fontSize: 13 }}>
+        <h1 className="v3-page-title" style={{ margin: 0, color: 'var(--v3-text)', fontWeight: 700 }}>Security Dashboard</h1>
+        <p className="v3-page-subtitle" style={{ margin: '4px 0 0', color: 'var(--v3-text-secondary)' }}>
           Live SOC telemetry overview with protocol, traffic, and threat analytics
         </p>
       </div>
@@ -184,19 +184,11 @@ const Dashboard: React.FC = () => {
 
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         {statCards.map((card) => (
-          <div key={card.label} style={{ ...cardStyle, padding: '14px 16px' }}>
-            <div
-              style={{
-                fontSize: 12,
-                color: '#64748B',
-                textTransform: 'uppercase',
-                letterSpacing: '0.05em',
-                marginBottom: 8,
-              }}
-            >
+          <div key={card.label} className="v3-stat-card" style={{ ...cardStyle, padding: '14px 16px' }}>
+            <div className="v3-stat-card-label">
               {card.label}
             </div>
-            <div style={{ fontSize: 28, fontWeight: 700, color: '#1E293B', lineHeight: 1.1 }}>
+            <div className="v3-stat-card-value">
               {Number(card.value).toLocaleString()}
             </div>
           </div>

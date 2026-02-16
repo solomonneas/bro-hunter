@@ -5,7 +5,7 @@
  *
  * Now the primary (and only shipped) variant. Other variants live under /dev/N for development only.
  */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Routes, Route, NavLink, Navigate, Link, useLocation } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -31,6 +31,8 @@ import {
   Settings as SettingsIcon,
   Binary,
   AlertOctagon,
+  Menu,
+  X,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { mockDashboardStats } from '../../data/mockData';
@@ -117,6 +119,12 @@ const V3App: React.FC<V3AppProps> = ({ basePath = '/' }) => {
 
   const NAV_ITEMS = buildNav(basePath);
   const BREADCRUMB_MAP = buildBreadcrumbs(basePath);
+  const [mobileNav, setMobileNav] = useState(false);
+  const closeMobileNav = useCallback(() => setMobileNav(false), []);
+
+  // Close mobile nav on route change
+  useEffect(() => { setMobileNav(false); }, [location.pathname]);
+
   const isDevMode = basePath !== '/';
 
   const currentPage = BREADCRUMB_MAP[location.pathname] || 'Dashboard';
@@ -170,9 +178,38 @@ const V3App: React.FC<V3AppProps> = ({ basePath = '/' }) => {
         </div>
       </nav>
 
+      {/* Mobile Nav Overlay */}
+      {mobileNav && (
+        <div className="v3-mobile-overlay" onClick={closeMobileNav}>
+          <nav className="v3-mobile-nav" onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+              <span style={{ fontWeight: 700, color: '#fff' }}>Bro Hunter</span>
+              <button onClick={closeMobileNav} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer' }}><X size={20} /></button>
+            </div>
+            <div style={{ padding: '8px' }}>
+              {NAV_ITEMS.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end}
+                  className={({ isActive }) => `v3-mobile-nav-item${isActive ? ' active' : ''}`}
+                  onClick={closeMobileNav}
+                >
+                  <item.icon size={18} />
+                  <span>{item.label}</span>
+                </NavLink>
+              ))}
+            </div>
+          </nav>
+        </div>
+      )}
+
       {/* Header */}
       <header className="v3-header">
         <div className="v3-header-left">
+          <button className="v3-mobile-menu-btn" onClick={() => setMobileNav(true)} aria-label="Open navigation">
+            <Menu size={20} />
+          </button>
           <nav className="v3-breadcrumb" aria-label="Breadcrumb">
             <Link to={homeLink}>SOC</Link>
             <ChevronRight size={12} className="v3-breadcrumb-sep" aria-hidden="true" />

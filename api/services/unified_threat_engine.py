@@ -149,7 +149,7 @@ class UnifiedThreatEngine:
     def _run_all_analyzers(self):
         """Run all detection engines."""
         # Beaconing detection
-        self._beacons = self.beacon_analyzer.detect_beacons(
+        self._beacons = self.beacon_analyzer.analyze_connections(
             self.log_store.connections
         )
 

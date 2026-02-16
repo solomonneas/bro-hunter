@@ -100,13 +100,20 @@ app.include_router(sigma.router, prefix=f"{settings.api_prefix}/sigma", tags=["s
 @app.on_event("startup")
 async def bootstrap_demo_data():
     """Auto-load bundled sanitized demo data when BROHUNTER_DEMO_MODE=true."""
-    import os
+    import os, traceback
     raw_env = os.environ.get("BROHUNTER_DEMO_MODE", "unset")
     demo = getattr(settings, "demo_mode", False)
     logger.info("Demo check: env=%s, settings.demo_mode=%s", raw_env, demo)
     if demo or raw_env.lower() in ("true", "1", "yes"):
-        stats = DemoDataService().load_into_store(log_store)
-        logger.info("Demo mode enabled. Loaded demo dataset: %s", stats)
+        try:
+            svc = DemoDataService()
+            logger.info("Demo data dir: %s, exists: %s", svc.data_dir, svc.data_dir.exists())
+            if svc.data_dir.exists():
+                logger.info("Demo files: %s", list(svc.data_dir.iterdir()))
+            stats = svc.load_into_store(log_store)
+            logger.info("Demo mode enabled. Loaded demo dataset: %s", stats)
+        except Exception:
+            logger.error("Failed to load demo data:\n%s", traceback.format_exc())
 
 
 # Serve frontend static files in production

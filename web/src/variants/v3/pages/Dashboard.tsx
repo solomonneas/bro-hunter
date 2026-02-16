@@ -47,7 +47,7 @@ const Dashboard: React.FC = () => {
       )}
 
       {loading ? <LoadingSkeleton rows={4} /> : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
           {[
             ['Total Connections', summary?.connections || 0],
             ['Threats Found', summary?.alerts || 0],

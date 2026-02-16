@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { Download, FileText, FileJson, FileCode, ChevronDown, Filter } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 type ExportFormat = 'csv' | 'stix' | 'openioc';
 type Severity = 'info' | 'low' | 'medium' | 'high' | 'critical';

@@ -6,7 +6,7 @@ import {
   Radio, Play, Square, Trash2, Download, RefreshCw, Wifi, Loader2, AlertCircle,
 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 interface CaptureSession {
   session_id: string;

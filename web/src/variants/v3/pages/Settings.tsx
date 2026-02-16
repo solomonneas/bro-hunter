@@ -5,7 +5,7 @@ import React, { useState, useEffect } from 'react';
 import { Save, Loader2, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import { useNotificationStore } from '../../../stores/notificationStore';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 interface AppSettings {
   threat_intel: {

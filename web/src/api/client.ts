@@ -10,7 +10,7 @@ export interface ApiClientConfig {
 }
 
 const DEFAULT_CONFIG: ApiClientConfig = {
-  baseUrl: import.meta.env.VITE_API_URL || 'http://localhost:8000',
+  baseUrl: import.meta.env.VITE_API_URL || '',
   timeout: 10000,
 };
 

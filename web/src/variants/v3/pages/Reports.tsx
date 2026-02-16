@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { FileText, Download, ExternalLink, Loader2 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 const Reports: React.FC = () => {
   const [loading, setLoading] = useState(false);

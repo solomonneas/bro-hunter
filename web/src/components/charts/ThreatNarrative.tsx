@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Globe, Network, Shield, ChevronDown, ChevronUp } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 type Severity = 'info' | 'low' | 'medium' | 'high' | 'critical';
 

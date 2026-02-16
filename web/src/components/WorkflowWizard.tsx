@@ -7,7 +7,7 @@ import { Upload, Loader2, CheckCircle, AlertCircle, FileUp, ArrowRight } from 'l
 import { useNotificationStore } from '../stores/notificationStore';
 // Direct access to store for add()
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
 
 type WizardStep = 'upload' | 'processing' | 'complete' | 'error';
 

@@ -4,7 +4,7 @@
 import React, { useState } from 'react';
 import { Search, Shield, AlertTriangle, CheckCircle, ExternalLink, Loader2 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_URL || '';
 
 interface IntelResult {
   source: string;

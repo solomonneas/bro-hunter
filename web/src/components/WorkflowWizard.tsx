@@ -2,7 +2,7 @@
  * WorkflowWizard: step-by-step PCAP upload and analysis pipeline.
  * Upload -> Processing (animated progress) -> Results redirect.
  */
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Upload, Loader2, CheckCircle, AlertCircle, FileUp, ArrowRight } from 'lucide-react';
 import { useNotificationStore } from '../stores/notificationStore';
 // Direct access to store for add()
@@ -34,6 +34,16 @@ const WorkflowWizard: React.FC<WorkflowWizardProps> = ({ className = '', onCompl
   const fileRef = useRef<HTMLInputElement>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const notify = useNotificationStore.add;
+
+  // Cleanup polling on unmount
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) {
+        clearInterval(pollRef.current);
+        pollRef.current = null;
+      }
+    };
+  }, []);
 
   const handleDrop = useCallback((e: React.DragEvent) => {
     e.preventDefault();

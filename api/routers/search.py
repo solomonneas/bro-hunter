@@ -1,6 +1,7 @@
 """
 Global Search Router: search across IPs, domains, alerts, and connections.
 """
+from collections import Counter
 from typing import Optional
 from fastapi import APIRouter, Query, HTTPException
 
@@ -39,6 +40,8 @@ async def global_search(q: str = Query(..., min_length=1, max_length=200)):
 
     # Search connections by IP
     connections = store.get_connections()
+    src_counts = Counter(getattr(c, "src_ip", "") for c in connections)
+    dst_counts = Counter(getattr(c, "dst_ip", "") for c in connections)
     seen_ips = set()
     for conn in connections:
         src = getattr(conn, "src_ip", "")
@@ -50,7 +53,7 @@ async def global_search(q: str = Query(..., min_length=1, max_length=200)):
                 results["ips"].append({
                     "ip": src,
                     "type": "source",
-                    "connection_count": sum(1 for c in connections if getattr(c, "src_ip", "") == src),
+                    "connection_count": src_counts.get(src, 0),
                 })
 
         if query in dst.lower():
@@ -59,7 +62,7 @@ async def global_search(q: str = Query(..., min_length=1, max_length=200)):
                 results["ips"].append({
                     "ip": dst,
                     "type": "destination",
-                    "connection_count": sum(1 for c in connections if getattr(c, "dst_ip", "") == dst),
+                    "connection_count": dst_counts.get(dst, 0),
                 })
 
         # Match connection by src or dst

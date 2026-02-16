@@ -47,11 +47,19 @@ async def upload_and_analyze(file: UploadFile = File(...)):
             detail=f"Invalid file type. Accepted: {', '.join(valid_exts)}"
         )
 
-    # Read file data (enforce 100MB limit)
-    data = await file.read()
+    # Stream file data with size limit enforcement
     max_size = 100 * 1024 * 1024
-    if len(data) > max_size:
-        raise HTTPException(status_code=413, detail="File exceeds 100MB limit")
+    chunks = []
+    total = 0
+    while True:
+        chunk = await file.read(64 * 1024)
+        if not chunk:
+            break
+        total += len(chunk)
+        if total > max_size:
+            raise HTTPException(status_code=413, detail="File exceeds 100MB limit")
+        chunks.append(chunk)
+    data = b"".join(chunks)
 
     manager = _get_manager()
     job = manager.create_job(file.filename, data)

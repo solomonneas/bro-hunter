@@ -1,6 +1,7 @@
 """
 Settings Router: GET/PUT application settings stored in a JSON file.
 """
+import copy
 import os
 import json
 import logging
@@ -50,7 +51,7 @@ class SettingsUpdate(BaseModel):
 
 def _load_settings() -> dict:
     """Load settings from file, merging with defaults."""
-    settings = dict(DEFAULT_SETTINGS)
+    settings = copy.deepcopy(DEFAULT_SETTINGS)
     if os.path.exists(SETTINGS_FILE):
         try:
             with open(SETTINGS_FILE, "r", encoding="utf-8") as f:
@@ -58,7 +59,7 @@ def _load_settings() -> dict:
             for section in settings:
                 if section in stored and isinstance(stored[section], dict):
                     settings[section].update(stored[section])
-        except Exception as e:
+        except (OSError, json.JSONDecodeError) as e:
             logger.warning(f"Failed to load settings file: {e}")
     return settings
 
@@ -98,8 +99,10 @@ async def update_settings(update: SettingsUpdate):
     if update.threat_intel:
         for k, v in update.threat_intel.items():
             # Don't overwrite keys with masked values
-            if k.endswith("_key") and v and "..." in v:
-                continue
+            if k.endswith("_key"):
+                existing = settings["threat_intel"].get(k, "")
+                if v and v == _mask_key(existing):
+                    continue
             settings["threat_intel"][k] = v
 
     if update.scoring:

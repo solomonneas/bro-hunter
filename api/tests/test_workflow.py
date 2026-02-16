@@ -5,6 +5,12 @@ from unittest.mock import patch, MagicMock
 from api.services.workflow_manager import WorkflowManager, JobStatus
 
 
+@pytest.fixture(autouse=True)
+def _no_pipeline(monkeypatch):
+    """Prevent tests from spawning real pipeline threads."""
+    monkeypatch.setattr(WorkflowManager, "_run_pipeline", lambda self, job_id: None)
+
+
 class TestWorkflowManager:
     def test_init(self):
         manager = WorkflowManager()

@@ -26,6 +26,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ onNavigate }) => {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const latestRequestIdRef = useRef(0);
 
   // Ctrl+K handler
   useEffect(() => {
@@ -45,7 +46,7 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ onNavigate }) => {
     return () => window.removeEventListener('keydown', handler);
   }, []);
 
-  const search = useCallback(async (q: string) => {
+  const search = useCallback(async (q: string, requestId: number) => {
     if (!q.trim() || q.length < 2) {
       setResults(null);
       return;
@@ -53,20 +54,24 @@ const GlobalSearch: React.FC<GlobalSearchProps> = ({ onNavigate }) => {
     setLoading(true);
     try {
       const res = await fetch(`${API_BASE}/api/v1/search?q=${encodeURIComponent(q)}`);
+      if (requestId !== latestRequestIdRef.current) return;
       if (res.ok) {
         setResults(await res.json());
+      } else {
+        setResults(null);
       }
     } catch {
-      // Silently fail
+      if (requestId === latestRequestIdRef.current) setResults(null);
     } finally {
-      setLoading(false);
+      if (requestId === latestRequestIdRef.current) setLoading(false);
     }
   }, []);
 
   const handleInput = (val: string) => {
     setQuery(val);
+    const id = ++latestRequestIdRef.current;
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => search(val), 300);
+    debounceRef.current = setTimeout(() => search(val, id), 300);
   };
 
   const close = () => {

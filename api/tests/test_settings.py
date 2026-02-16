@@ -25,8 +25,9 @@ class TestSettings:
         assert masked.endswith("mnop")
         assert "..." in masked
 
-    def test_load_default_when_no_file(self):
-        with patch("api.routers.settings.SETTINGS_FILE", "/tmp/nonexistent_brohunter_settings.json"):
+    def test_load_default_when_no_file(self, tmp_path):
+        missing = str(tmp_path / "nonexistent_brohunter_settings.json")
+        with patch("api.routers.settings.SETTINGS_FILE", missing):
             settings = _load_settings()
             assert settings["scoring"]["beacon_weight"] == 1.0
 

@@ -54,7 +54,11 @@ class WorkflowManager:
         job_dir = os.path.join(self._work_dir, job_id)
         os.makedirs(job_dir, exist_ok=True)
 
-        pcap_path = os.path.join(job_dir, filename)
+        from pathlib import Path
+        safe_name = Path(filename).name
+        if not safe_name or safe_name.strip(".") == "":
+            safe_name = f"{job_id}.pcap"
+        pcap_path = os.path.join(job_dir, safe_name)
         with open(pcap_path, "wb") as f:
             f.write(pcap_data)
 
@@ -67,10 +71,15 @@ class WorkflowManager:
         )
         self._jobs[job_id] = job
 
-        # Trim old jobs if over limit
+        # Trim old jobs if over limit (only evict terminal-state jobs)
         if len(self._jobs) > self.MAX_JOBS:
-            oldest = sorted(self._jobs.values(), key=lambda j: j.created_at)
-            for old in oldest[:len(self._jobs) - self.MAX_JOBS]:
+            terminal = [j for j in self._jobs.values() if j.status in (JobStatus.COMPLETE, JobStatus.FAILED)]
+            terminal.sort(key=lambda j: j.created_at)
+            to_remove = len(self._jobs) - self.MAX_JOBS
+            if len(terminal) < to_remove:
+                logger.warning(f"Cannot trim to MAX_JOBS: {len(self._jobs) - len(terminal)} active jobs")
+                to_remove = len(terminal)
+            for old in terminal[:to_remove]:
                 self._cleanup_job(old.job_id)
 
         # Run pipeline in background thread

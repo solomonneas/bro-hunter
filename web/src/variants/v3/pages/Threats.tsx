@@ -6,6 +6,7 @@ import { X, ExternalLink, Clock, Target, Shield, Search, Filter, ChevronUp, Chev
 import { format } from 'date-fns';
 import { mockAlerts, mockMitreMappings } from '../../../data/mockData';
 import type { ThreatScore, MitreMapping } from '../../../types';
+import AddToCase from '../../../components/AddToCase';
 
 const SEVERITY_ORDER: Record<string, number> = { critical: 0, high: 1, medium: 2, low: 3, info: 4 };
 
@@ -314,12 +315,13 @@ const Threats: React.FC = () => {
                 <th className="sortable" onClick={() => handleSort('last_seen')} style={{ width: 130 }}>
                   <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>Last Seen <SortIcon col="last_seen" /></span>
                 </th>
+                <th style={{ width: 120 }}>Case</th>
               </tr>
             </thead>
             <tbody>
               {paged.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ textAlign: 'center', padding: '32px 16px', color: '#94A3B8' }}>
+                  <td colSpan={7} style={{ textAlign: 'center', padding: '32px 16px', color: '#94A3B8' }}>
                     No threats match your filters.
                   </td>
                 </tr>
@@ -343,6 +345,14 @@ const Threats: React.FC = () => {
                     </td>
                     <td style={{ color: '#64748B', fontSize: 12 }}>
                       {format(new Date(a.last_seen * 1000), 'MMM d, HH:mm')}
+                    </td>
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <AddToCase
+                        findingType="alert"
+                        summary={`Threat detected: ${a.entity}`}
+                        severity={a.level as string}
+                        data={{ entity: a.entity, reasons: a.reasons, mitre_techniques: a.mitre_techniques }}
+                      />
                     </td>
                   </tr>
                 ))

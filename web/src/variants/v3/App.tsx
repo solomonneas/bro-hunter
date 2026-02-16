@@ -30,6 +30,7 @@ import {
   Upload,
   Settings as SettingsIcon,
   Binary,
+  OctagonAlert,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { mockDashboardStats } from '../../data/mockData';
@@ -43,11 +44,14 @@ import TimelinePage from './pages/Timeline';
 import Sessions from './pages/Sessions';
 import Tuning from './pages/Tuning';
 import Analytics from './pages/Analytics';
+import Anomalies from './pages/Anomalies';
 import Intel from './pages/Intel';
 import Capture from './pages/Capture';
 import Reports from './pages/Reports';
+import Cases from './pages/Cases';
 import Workflow from './pages/Workflow';
 import Settings from './pages/Settings';
+import Rules from './pages/Rules';
 import Packets from './pages/Packets';
 import GlobalSearch from '../../components/GlobalSearch';
 import NotificationToast from '../../components/NotificationToast';
@@ -71,12 +75,15 @@ function buildNav(base: string) {
     { to: `${b}/sessions`, icon: Link2, label: 'Sessions', end: false },
     { to: `${b}/packets`, icon: Binary, label: 'Packets', end: false },
     { to: `${b}/analytics`, icon: BarChart3, label: 'Analytics', end: false },
+    { to: `${b}/anomalies`, icon: OctagonAlert, label: 'Anomalies', end: false },
     { to: `${b}/intel`, icon: Crosshair, label: 'Threat Intel', end: false },
     { to: `${b}/capture`, icon: Antenna, label: 'Live Capture', end: false },
     { to: `${b}/reports`, icon: FileText, label: 'Reports', end: false },
+    { to: `${b}/cases`, icon: FileText, label: 'Cases', end: false },
     { to: `${b}/workflow`, icon: Upload, label: 'PCAP Workflow', end: false },
-    { to: `${b}/settings`, icon: SettingsIcon, label: 'Settings', end: false },
     { to: `${b}/tuning`, icon: Sliders, label: 'Tuning', end: false },
+    { to: `${b}/rules`, icon: Shield, label: 'Rules', end: false },
+    { to: `${b}/settings`, icon: SettingsIcon, label: 'Settings', end: false },
   ];
 }
 
@@ -84,8 +91,8 @@ function buildBreadcrumbs(base: string): Record<string, string> {
   const b = base === '/' ? '' : base;
   const map: Record<string, string> = {};
   map[base] = 'Dashboard';
-  const pages = ['connections', 'beacons', 'dns', 'threats', 'hunts', 'timeline', 'sessions', 'packets', 'analytics', 'intel', 'capture', 'reports', 'workflow', 'settings', 'tuning'];
-  const labels = ['Connections', 'Beacons', 'DNS Threats', 'Threats', 'Hunt Results', 'Threat Timeline', 'Sessions', 'Packets', 'Analytics', 'Threat Intel', 'Live Capture', 'Reports', 'PCAP Workflow', 'Settings', 'Tuning'];
+  const pages = ['connections', 'beacons', 'dns', 'threats', 'hunts', 'timeline', 'sessions', 'packets', 'analytics', 'anomalies', 'intel', 'capture', 'reports', 'cases', 'workflow', 'tuning', 'rules', 'settings'];
+  const labels = ['Connections', 'Beacons', 'DNS Threats', 'Threats', 'Hunt Results', 'Threat Timeline', 'Sessions', 'Packets', 'Analytics', 'Anomalies', 'Threat Intel', 'Live Capture', 'Reports', 'Cases', 'PCAP Workflow', 'Tuning', 'Rules', 'Settings'];
   pages.forEach((p, i) => { map[`${b}/${p}`] = labels[i]; });
   return map;
 }
@@ -223,12 +230,15 @@ const V3App: React.FC<V3AppProps> = ({ basePath = '/' }) => {
           <Route path="sessions" element={<Sessions />} />
           <Route path="packets" element={<Packets />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="anomalies" element={<Anomalies />} />
           <Route path="intel" element={<Intel />} />
           <Route path="capture" element={<Capture />} />
           <Route path="reports" element={<Reports />} />
+          <Route path="cases" element={<Cases />} />
           <Route path="workflow" element={<Workflow />} />
-          <Route path="settings" element={<Settings />} />
           <Route path="tuning" element={<Tuning />} />
+          <Route path="rules" element={<Rules />} />
+          <Route path="settings" element={<Settings />} />
           <Route path="*" element={<Navigate to={homeLink} replace />} />
         </Routes>
       </main>

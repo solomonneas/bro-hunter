@@ -1,0 +1,7 @@
+title: DNS over HTTPS Endpoint Access
+description: HTTP URI contains dns-query pattern
+level: medium
+detection:
+  selection:
+    Url|contains: dns-query
+  condition: selection

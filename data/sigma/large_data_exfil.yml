@@ -1,0 +1,7 @@
+title: Large Data Exfiltration Volume
+description: Large response byte volume to external destination
+level: critical
+detection:
+  selection:
+    BytesIn: 10000000
+  condition: selection

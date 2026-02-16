@@ -7,6 +7,7 @@ import { Download, Filter, Search, X, ChevronUp, ChevronDown, ChevronsUpDown, Ch
 import { format } from 'date-fns';
 import { mockAlerts } from '../../../data/mockData';
 import type { ThreatScore } from '../../../types';
+import AddToCase from '../../../components/AddToCase';
 
 type SortDir = 'asc' | 'desc';
 
@@ -180,12 +181,13 @@ const Connections: React.FC = () => {
                     Last Seen <SortIcon col="last_seen" />
                   </span>
                 </th>
+                <th style={{ width: 120 }}>Case</th>
               </tr>
             </thead>
             <tbody>
               {paged.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', padding: '32px 16px', color: '#94A3B8' }}>
+                  <td colSpan={8} style={{ textAlign: 'center', padding: '32px 16px', color: '#94A3B8' }}>
                     No connections match your filters.
                   </td>
                 </tr>
@@ -222,6 +224,14 @@ const Connections: React.FC = () => {
                     <td className="mono" style={{ color: '#64748B' }}>{a.occurrence_count}</td>
                     <td style={{ color: '#64748B', fontSize: 12 }}>
                       {format(new Date(a.last_seen * 1000), 'MMM d, HH:mm')}
+                    </td>
+                    <td>
+                      <AddToCase
+                        findingType="connection"
+                        summary={`Suspicious connection: ${a.entity}`}
+                        severity={a.level as string}
+                        data={{ entity: a.entity, indicators: a.indicators, mitre_techniques: a.mitre_techniques }}
+                      />
                     </td>
                   </tr>
                 ))

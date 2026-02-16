@@ -25,6 +25,7 @@ import {
   mockDnsThreats,
 } from '../../../data/mockData';
 import type { ThreatIndicator } from '../../../types';
+import AddToCase from '../../../components/AddToCase';
 
 const severityColor = (level: string): string => {
   const map: Record<string, string> = {
@@ -183,10 +184,16 @@ const HuntResults: React.FC = () => {
                   <li key={j} style={{ fontSize: 13, color: '#475569', marginBottom: 3 }}>• {r}</li>
                 ))}
               </ul>
-              <div style={{ marginTop: 8, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
+              <div style={{ marginTop: 8, display: 'flex', gap: 4, flexWrap: 'wrap', alignItems: 'center' }}>
                 {a.mitre_techniques.map((t) => (
                   <span key={t} className="v3-tag" style={{ fontSize: 10, padding: '1px 6px' }}>{t}</span>
                 ))}
+                <AddToCase
+                  findingType="rule_match"
+                  summary={`Hunt result finding: ${a.entity}`}
+                  severity={a.level as string}
+                  data={{ entity: a.entity, score: a.score, mitre_techniques: a.mitre_techniques, reasons: a.reasons }}
+                />
               </div>
             </div>
           ))}

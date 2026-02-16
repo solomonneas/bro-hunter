@@ -9,7 +9,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.config import settings
-from api.routers import analysis, logs, ingest, data, hunt, dns_threat, export, sessions, scoring, intel, reports, analytics, capture, workflow, search, packets
+from api.routers import analysis, logs, ingest, data, hunt, dns_threat, export, sessions, scoring, intel, reports, analytics, capture, workflow, search, packets, baseline, anomalies, cases, bundles, rules, sigma
 from api.routers import settings as settings_router
 from api.services.log_store import log_store
 from api.services.demo_data import DemoDataService
@@ -83,12 +83,18 @@ app.include_router(sessions.router, prefix=f"{settings.api_prefix}/sessions", ta
 app.include_router(scoring.router, prefix=f"{settings.api_prefix}/scoring", tags=["scoring"])
 app.include_router(intel.router, prefix=f"{settings.api_prefix}/intel", tags=["intel"])
 app.include_router(reports.router, prefix=f"{settings.api_prefix}/reports", tags=["reports"])
+app.include_router(cases.router, prefix=f"{settings.api_prefix}/cases", tags=["cases"])
+app.include_router(bundles.router, prefix=f"{settings.api_prefix}/cases", tags=["bundles"])
 app.include_router(analytics.router, prefix=f"{settings.api_prefix}/analytics", tags=["analytics"])
 app.include_router(capture.router, prefix=f"{settings.api_prefix}/capture", tags=["capture"])
 app.include_router(workflow.router, prefix=f"{settings.api_prefix}/workflow", tags=["workflow"])
 app.include_router(settings_router.router, prefix=f"{settings.api_prefix}/settings", tags=["settings"])
 app.include_router(search.router, prefix=f"{settings.api_prefix}/search", tags=["search"])
 app.include_router(packets.router, prefix=f"{settings.api_prefix}/packets", tags=["packets"])
+app.include_router(baseline.router, prefix=f"{settings.api_prefix}/baseline", tags=["baseline"])
+app.include_router(anomalies.router, prefix=f"{settings.api_prefix}/anomalies", tags=["anomalies"])
+app.include_router(rules.router, prefix=f"{settings.api_prefix}/rules", tags=["rules"])
+app.include_router(sigma.router, prefix=f"{settings.api_prefix}/sigma", tags=["sigma"])
 
 
 @app.on_event("startup")

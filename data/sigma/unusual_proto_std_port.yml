@@ -1,0 +1,8 @@
+title: Unusual Protocol on Standard Web Ports
+description: Non-TCP protocol over common web ports
+level: medium
+detection:
+  selection:
+    DestinationPort: [80, 443]
+    Protocol: udp
+  condition: selection

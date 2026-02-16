@@ -1,0 +1,7 @@
+title: TOR Exit Node Connection
+description: Destination IP in known TOR exit CIDR demo range
+level: high
+detection:
+  selection:
+    DestinationIp|contains: 185.
+  condition: selection

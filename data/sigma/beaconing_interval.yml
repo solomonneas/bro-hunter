@@ -1,0 +1,7 @@
+title: Potential Beaconing User-Agent
+description: Automated command-and-control user agent strings
+level: high
+detection:
+  selection:
+    UserAgent|contains: python-requests
+  condition: selection

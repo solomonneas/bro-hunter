@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     # File Processing
     max_file_size: int = 100 * 1024 * 1024  # 100MB
     chunk_size: int = 8192  # For streaming large files
+    cases_dir: str = "data/cases"
 
     # Threat Scoring Thresholds
     high_threat_threshold: float = 0.75

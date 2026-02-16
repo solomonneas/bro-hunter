@@ -1,0 +1,7 @@
+title: DNS Tunneling Long Queries
+description: Detect unusually long DNS query names often used for tunneling
+level: high
+detection:
+  selection:
+    QueryName|re: '^[a-zA-Z0-9]{40,}\.'
+  condition: selection

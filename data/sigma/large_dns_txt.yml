@@ -1,0 +1,7 @@
+title: Large DNS TXT Exfil Indicator
+description: DNS query contains txt and long encoded label
+level: high
+detection:
+  selection:
+    QueryName|contains: txt
+  condition: selection

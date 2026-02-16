@@ -1,0 +1,7 @@
+title: Suspicious User-Agent Tooling
+description: Curl, Wget, or scripted request user-agent strings
+level: medium
+detection:
+  selection:
+    UserAgent|re: '(curl|wget|python-requests)'
+  condition: selection

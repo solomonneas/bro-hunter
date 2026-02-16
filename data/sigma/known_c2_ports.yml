@@ -1,0 +1,7 @@
+title: Known C2 Ports
+description: Detect traffic to common C2 ports
+level: high
+detection:
+  selection:
+    DestinationPort: [4444, 9001, 31337]
+  condition: selection

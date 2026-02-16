@@ -1,0 +1,7 @@
+title: Crypto Mining Pool Connection
+description: DNS lookup to common mining pool keywords
+level: medium
+detection:
+  selection:
+    QueryName|contains: pool
+  condition: selection

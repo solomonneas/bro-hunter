@@ -1,0 +1,7 @@
+title: ICMP Tunneling Pattern
+description: ICMP protocol with large transfer volume
+level: high
+detection:
+  selection:
+    Protocol: icmp
+  condition: selection

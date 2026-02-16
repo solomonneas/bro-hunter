@@ -30,7 +30,7 @@ import {
   Upload,
   Settings as SettingsIcon,
   Binary,
-  OctagonAlert,
+  AlertOctagon,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { mockDashboardStats } from '../../data/mockData';
@@ -75,7 +75,7 @@ function buildNav(base: string) {
     { to: `${b}/sessions`, icon: Link2, label: 'Sessions', end: false },
     { to: `${b}/packets`, icon: Binary, label: 'Packets', end: false },
     { to: `${b}/analytics`, icon: BarChart3, label: 'Analytics', end: false },
-    { to: `${b}/anomalies`, icon: OctagonAlert, label: 'Anomalies', end: false },
+    { to: `${b}/anomalies`, icon: AlertOctagon, label: 'Anomalies', end: false },
     { to: `${b}/intel`, icon: Crosshair, label: 'Threat Intel', end: false },
     { to: `${b}/capture`, icon: Antenna, label: 'Live Capture', end: false },
     { to: `${b}/reports`, icon: FileText, label: 'Reports', end: false },

@@ -6,7 +6,6 @@ import React, { useState, useMemo } from 'react';
 import { Download, Filter, Search, X, ChevronUp, ChevronDown, ChevronsUpDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format } from 'date-fns';
 import { mockAlerts } from '../../../data/mockData';
-import type { ThreatScore } from '../../../types';
 import AddToCase from '../../../components/AddToCase';
 
 type SortDir = 'asc' | 'desc';

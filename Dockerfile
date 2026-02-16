@@ -22,6 +22,9 @@ RUN npm install \
 # Backend
 COPY api/ ./api/
 
+# Data (demo logs, sigma rules, cases dir)
+COPY data/ ./data/
+
 ENV PORT=8000
 EXPOSE 8000
 

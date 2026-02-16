@@ -50,9 +50,9 @@ app.add_middleware(
 )
 
 
-@app.get("/")
+@app.get("/api/status")
 async def root():
-    """Root endpoint - API health check."""
+    """API status endpoint."""
     return {
         "name": settings.app_name,
         "version": settings.app_version,

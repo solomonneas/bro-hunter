@@ -74,6 +74,10 @@ data/zeek/
 data/README.md
 analyze_local.py
 *.json
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.node.json
 eve-*.json
 
 FRONTEND_DESIGN.md

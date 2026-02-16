@@ -24,13 +24,16 @@ import {
   Sliders,
   Link2,
   BarChart3,
+  TrendingUp,
   FileText,
   Crosshair,
+  FileSearch,
   Antenna,
   Upload,
   Settings as SettingsIcon,
   Binary,
   AlertOctagon,
+  Server,
   Menu,
   X,
 } from 'lucide-react';
@@ -40,11 +43,15 @@ import Connections from './pages/Connections';
 import Beacons from './pages/Beacons';
 import DnsThreats from './pages/DnsThreats';
 import Threats from './pages/Threats';
+import HostRanking from './pages/HostRanking';
+import HostDeepDive from './pages/HostDeepDive';
 import HuntResults from './pages/HuntResults';
+import Hypotheses from './pages/Hypotheses';
 import TimelinePage from './pages/Timeline';
 import Sessions from './pages/Sessions';
 import Tuning from './pages/Tuning';
 import Analytics from './pages/Analytics';
+import Trends from './pages/Trends';
 import Anomalies from './pages/Anomalies';
 import Intel from './pages/Intel';
 import Capture from './pages/Capture';
@@ -73,11 +80,14 @@ function buildNav(base: string) {
     { to: `${b}/beacons`, icon: Radio, label: 'Beacons', end: false },
     { to: `${b}/dns`, icon: Globe, label: 'DNS Threats', end: false },
     { to: `${b}/threats`, icon: Shield, label: 'Threats', end: false },
+    { to: `${b}/hosts`, icon: Server, label: 'Host Ranking', end: false },
     { to: `${b}/hunts`, icon: Search, label: 'Hunt Results', end: false },
+    { to: `${b}/hypotheses`, icon: FileSearch, label: 'Hypotheses', end: false },
     { to: `${b}/timeline`, icon: ListTree, label: 'Threat Timeline', end: false },
     { to: `${b}/sessions`, icon: Link2, label: 'Sessions', end: false },
     { to: `${b}/packets`, icon: Binary, label: 'Packets', end: false },
     { to: `${b}/analytics`, icon: BarChart3, label: 'Analytics', end: false },
+    { to: `${b}/trends`, icon: TrendingUp, label: 'Trends', end: false },
     { to: `${b}/anomalies`, icon: AlertOctagon, label: 'Anomalies', end: false },
     { to: `${b}/intel`, icon: Crosshair, label: 'Threat Intel', end: false },
     { to: `${b}/capture`, icon: Antenna, label: 'Live Capture', end: false },
@@ -94,9 +104,11 @@ function buildBreadcrumbs(base: string): Record<string, string> {
   const b = base === '/' ? '' : base;
   const map: Record<string, string> = {};
   map[base] = 'Dashboard';
-  const pages = ['connections', 'beacons', 'dns', 'threats', 'hunts', 'timeline', 'sessions', 'packets', 'analytics', 'anomalies', 'intel', 'capture', 'reports', 'cases', 'workflow', 'tuning', 'rules', 'settings'];
-  const labels = ['Connections', 'Beacons', 'DNS Threats', 'Threats', 'Hunt Results', 'Threat Timeline', 'Sessions', 'Packets', 'Analytics', 'Anomalies', 'Threat Intel', 'Live Capture', 'Reports', 'Cases', 'PCAP Workflow', 'Tuning', 'Rules', 'Settings'];
+  const pages = ['connections', 'beacons', 'dns', 'threats', 'hosts', 'hunts', 'hypotheses', 'timeline', 'sessions', 'packets', 'analytics', 'trends', 'anomalies', 'intel', 'capture', 'reports', 'cases', 'workflow', 'tuning', 'rules', 'settings'];
+  const labels = ['Connections', 'Beacons', 'DNS Threats', 'Threats', 'Host Ranking', 'Hunt Results', 'Hunt Hypotheses', 'Threat Timeline', 'Sessions', 'Packets', 'Analytics', 'Trend Analysis', 'Anomalies', 'Threat Intel', 'Live Capture', 'Reports', 'Cases', 'PCAP Workflow', 'Tuning', 'Rules', 'Settings'];
   pages.forEach((p, i) => { map[`${b}/${p}`] = labels[i]; });
+  map[`${b}/hosts`] = 'Host Ranking';
+  map[`${b}/hypotheses`] = 'Hunt Hypotheses';
   return map;
 }
 
@@ -277,11 +289,15 @@ const V3App: React.FC<V3AppProps> = ({ basePath = '/' }) => {
           <Route path="beacons" element={<Beacons />} />
           <Route path="dns" element={<DnsThreats />} />
           <Route path="threats" element={<Threats />} />
+          <Route path="hosts" element={<HostRanking />} />
+          <Route path="host/:ip" element={<HostDeepDive />} />
           <Route path="hunts" element={<HuntResults />} />
+          <Route path="hypotheses" element={<Hypotheses />} />
           <Route path="timeline" element={<TimelinePage />} />
           <Route path="sessions" element={<Sessions />} />
           <Route path="packets" element={<Packets />} />
           <Route path="analytics" element={<Analytics />} />
+          <Route path="trends" element={<Trends />} />
           <Route path="anomalies" element={<Anomalies />} />
           <Route path="intel" element={<Intel />} />
           <Route path="capture" element={<Capture />} />

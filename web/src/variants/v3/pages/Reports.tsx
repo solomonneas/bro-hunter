@@ -1,138 +1,238 @@
-/**
- * Reports Page - Generate and view threat assessment reports for Variant 3.
- */
-import React, { useState } from 'react';
-import { FileText, Download, ExternalLink, Loader2 } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { Download, Eye, FileText, Loader2, Plus, ShieldAlert, Trash2 } from 'lucide-react';
 
-const API_BASE = import.meta.env.VITE_API_URL || '';
+const API_BASE = import.meta.env.VITE_API_BASE || '';
+
+type SeverityDistribution = {
+  critical?: number;
+  high?: number;
+  medium?: number;
+  low?: number;
+  info?: number;
+};
+
+interface ReportHistoryItem {
+  report_id: string;
+  title: string;
+  generated_at: string;
+  threat_count: number;
+  severity_distribution: SeverityDistribution;
+  file_size_bytes: number;
+  files: {
+    json: string;
+    html: string;
+    pdf: string;
+  };
+}
 
 const Reports: React.FC = () => {
-  const [loading, setLoading] = useState(false);
-  const [jsonReport, setJsonReport] = useState<Record<string, any> | null>(null);
+  const [reports, setReports] = useState<ReportHistoryItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [selectedReportId, setSelectedReportId] = useState<string | null>(null);
 
-  const generateJson = async () => {
+  const selectedReport = useMemo(
+    () => reports.find((r) => r.report_id === selectedReportId) || null,
+    [reports, selectedReportId],
+  );
+
+  const lastGeneratedDate = useMemo(() => {
+    if (!reports.length) return '—';
+    return new Date(reports[0].generated_at).toLocaleString();
+  }, [reports]);
+
+  const loadHistory = async () => {
     setLoading(true);
     try {
-      const res = await fetch(`${API_BASE}/api/v1/reports/json`);
-      if (!res.ok) throw new Error(`Failed: ${res.status}`);
-      setJsonReport(await res.json());
-    } catch (err) {
-      console.error('Failed to generate report:', err);
+      const res = await fetch(`${API_BASE}/api/v1/reports/history`);
+      if (!res.ok) throw new Error(`Failed loading history: ${res.status}`);
+      const data = await res.json();
+      setReports(Array.isArray(data?.reports) ? data.reports : []);
+      if (!selectedReportId && data?.reports?.length) {
+        setSelectedReportId(data.reports[0].report_id);
+      }
+    } catch (error) {
+      console.error('Failed to load report history', error);
+      setReports([]);
     } finally {
       setLoading(false);
     }
   };
 
-  const openHtml = () => {
-    window.open(`${API_BASE}/api/v1/reports/html`, '_blank');
+  useEffect(() => {
+    loadHistory();
+  }, []);
+
+  const handleGenerate = async () => {
+    setGenerating(true);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/reports/generate`, { method: 'POST' });
+      if (!res.ok) throw new Error(`Failed generating report: ${res.status}`);
+      const metadata: ReportHistoryItem = await res.json();
+      await loadHistory();
+      setSelectedReportId(metadata.report_id);
+    } catch (error) {
+      console.error('Failed to generate report', error);
+    } finally {
+      setGenerating(false);
+    }
   };
 
-  const downloadJson = () => {
-    if (!jsonReport) return;
-    const blob = new Blob([JSON.stringify(jsonReport, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `bro-hunter-report-${new Date().toISOString().slice(0, 10)}.json`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+  const handleDelete = async (reportId: string) => {
+    setDeletingId(reportId);
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/reports/history/${reportId}`, { method: 'DELETE' });
+      if (!res.ok) throw new Error(`Failed deleting report: ${res.status}`);
+      await loadHistory();
+      if (selectedReportId === reportId) {
+        setSelectedReportId(null);
+      }
+    } catch (error) {
+      console.error('Failed to delete report', error);
+    } finally {
+      setDeletingId(null);
+    }
   };
+
+  const formatBytes = (bytes?: number) => {
+    if (!bytes) return '0 B';
+    const units = ['B', 'KB', 'MB', 'GB'];
+    let size = bytes;
+    let idx = 0;
+    while (size >= 1024 && idx < units.length - 1) {
+      size /= 1024;
+      idx += 1;
+    }
+    return `${size.toFixed(idx === 0 ? 0 : 1)} ${units[idx]}`;
+  };
+
+  const severityBadge = (level: keyof SeverityDistribution, count: number | undefined) => (
+    <span key={level} className={`v3-badge ${level}`} style={{ marginRight: 6 }}>
+      {level.toUpperCase()}: {count ?? 0}
+    </span>
+  );
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-100">Threat Reports</h1>
-        <p className="text-sm text-gray-500 mt-1">Generate comprehensive threat assessment reports</p>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        {/* HTML Report Card */}
-        <div className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <FileText size={18} className="text-cyan-400" />
-            <h3 className="font-semibold text-gray-200">HTML Report</h3>
-          </div>
-          <p className="text-sm text-gray-400 mb-4">
-            Full visual report with executive summary, top threats, MITRE coverage, and IOC listing.
-            Opens in a new browser tab.
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12 }}>
+        <div>
+          <h1 className="v3-page-title" style={{ margin: 0 }}>Threat Reports</h1>
+          <p className="v3-page-subtitle" style={{ marginTop: 4 }}>
+            Generate, track, and review PDF threat assessment reports.
           </p>
-          <button
-            onClick={openHtml}
-            className="flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-medium rounded-lg transition-colors"
-          >
-            <ExternalLink size={16} /> Open HTML Report
-          </button>
         </div>
 
-        {/* JSON Report Card */}
-        <div className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <FileText size={18} className="text-orange-400" />
-            <h3 className="font-semibold text-gray-200">JSON Report</h3>
-          </div>
-          <p className="text-sm text-gray-400 mb-4">
-            Structured data export for integration with SIEM, SOAR, or custom analysis tools.
-          </p>
-          <div className="flex gap-2">
-            <button
-              onClick={generateJson}
-              disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-500 disabled:bg-gray-700 text-white text-sm font-medium rounded-lg transition-colors"
-            >
-              {loading ? <Loader2 size={16} className="animate-spin" /> : <FileText size={16} />}
-              Generate
-            </button>
-            {jsonReport && (
-              <button
-                onClick={downloadJson}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 text-sm rounded-lg transition-colors"
-              >
-                <Download size={16} /> Download
-              </button>
-            )}
-          </div>
+        <button className="v3-btn v3-btn-primary" onClick={handleGenerate} disabled={generating}>
+          {generating ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+          <span>{generating ? 'Generating…' : 'Generate New Report'}</span>
+        </button>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="v3-kpi">
+          <div className="label">Total Reports</div>
+          <div className="value">{reports.length}</div>
+        </div>
+        <div className="v3-kpi">
+          <div className="label">Last Generated</div>
+          <div className="value" style={{ fontSize: 20 }}>{lastGeneratedDate}</div>
         </div>
       </div>
 
-      {/* JSON Preview */}
-      {jsonReport && (
-        <div className="bg-gray-900/50 border border-gray-700/50 rounded-xl p-5">
-          <h3 className="text-sm font-semibold text-gray-300 mb-3">Executive Summary</h3>
-          <div className="grid grid-cols-4 gap-3 mb-4">
-            {[
-              { label: 'Critical', value: jsonReport.executive_summary?.critical_count, color: 'text-red-400' },
-              { label: 'High', value: jsonReport.executive_summary?.high_count, color: 'text-orange-400' },
-              { label: 'Medium', value: jsonReport.executive_summary?.medium_count, color: 'text-yellow-400' },
-              { label: 'MITRE Techniques', value: jsonReport.executive_summary?.mitre_techniques_observed, color: 'text-blue-400' },
-            ].map(({ label, value, color }) => (
-              <div key={label} className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className={`text-2xl font-bold ${color}`}>{value ?? 0}</div>
-                <div className="text-xs text-gray-500">{label}</div>
-              </div>
-            ))}
-          </div>
+      <div className="v3-card" style={{ padding: 16 }}>
+        <h3 style={{ marginTop: 0, marginBottom: 12 }}>Report History</h3>
 
-          <h3 className="text-sm font-semibold text-gray-300 mb-2">Top Threats</h3>
-          <div className="space-y-1 max-h-60 overflow-y-auto">
-            {jsonReport.top_threats?.slice(0, 10).map((t: any, i: number) => (
-              <div key={i} className="flex items-center gap-3 text-sm py-1">
-                <span className="font-mono text-xs text-gray-300 w-32">{t.ip}</span>
-                <span className={`text-xs px-2 py-0.5 rounded ${
-                  t.threat_level === 'critical' ? 'bg-red-500/20 text-red-400' :
-                  t.threat_level === 'high' ? 'bg-orange-500/20 text-orange-400' :
-                  'bg-yellow-500/20 text-yellow-400'
-                }`}>
-                  {t.threat_level}
-                </span>
-                <span className="text-gray-400 text-xs truncate flex-1">{t.summary}</span>
-                <span className="text-gray-500 font-mono text-xs">{(t.score * 100).toFixed(0)}</span>
-              </div>
-            ))}
+        {loading ? (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: '#64748B' }}>
+            <Loader2 size={16} className="animate-spin" />
+            Loading report history...
           </div>
+        ) : reports.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '30px 16px', color: '#64748B' }}>
+            <ShieldAlert size={26} style={{ marginBottom: 8 }} />
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>No reports generated yet</div>
+            <div>Click "Generate New Report" to create your first threat report.</div>
+          </div>
+        ) : (
+          <div className="v3-table-wrapper">
+            <table className="v3-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Title / ID</th>
+                  <th style={{ textAlign: 'right' }}>Threats</th>
+                  <th>Severity Breakdown</th>
+                  <th style={{ textAlign: 'right' }}>File Size</th>
+                  <th style={{ textAlign: 'right' }}>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reports.map((report) => (
+                  <tr key={report.report_id}>
+                    <td>{new Date(report.generated_at).toLocaleString()}</td>
+                    <td>
+                      <div style={{ fontWeight: 600 }}>{report.title || report.report_id}</div>
+                      <div className="mono" style={{ color: '#64748B', fontSize: 12 }}>{report.report_id}</div>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>{report.threat_count}</td>
+                    <td>
+                      {severityBadge('critical', report.severity_distribution?.critical)}
+                      {severityBadge('high', report.severity_distribution?.high)}
+                      {severityBadge('medium', report.severity_distribution?.medium)}
+                      {severityBadge('low', report.severity_distribution?.low)}
+                    </td>
+                    <td style={{ textAlign: 'right' }}>{formatBytes(report.file_size_bytes)}</td>
+                    <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      <button
+                        className="v3-btn v3-btn-outline"
+                        style={{ marginRight: 8 }}
+                        onClick={() => window.open(`${API_BASE}/api/v1/reports/history/${report.report_id}/download`, '_blank')}
+                      >
+                        <Download size={14} />
+                        <span>Download PDF</span>
+                      </button>
+                      <button
+                        className="v3-btn v3-btn-outline"
+                        style={{ marginRight: 8 }}
+                        onClick={() => setSelectedReportId(report.report_id)}
+                      >
+                        <Eye size={14} />
+                        <span>View HTML</span>
+                      </button>
+                      <button
+                        className="v3-btn v3-btn-outline"
+                        onClick={() => handleDelete(report.report_id)}
+                        disabled={deletingId === report.report_id}
+                      >
+                        {deletingId === report.report_id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
+                        <span>Delete</span>
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="v3-card" style={{ padding: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+          <FileText size={16} />
+          <h3 style={{ margin: 0 }}>HTML Report Preview</h3>
         </div>
-      )}
+
+        {selectedReport ? (
+          <iframe
+            title="Report Preview"
+            src={`${API_BASE}/api/v1/reports/history/${selectedReport.report_id}/html`}
+            style={{ width: '100%', minHeight: 720, border: '1px solid #E2E8F0', borderRadius: 8 }}
+          />
+        ) : (
+          <div style={{ color: '#64748B' }}>Select a report from history to preview its HTML output.</div>
+        )}
+      </div>
     </div>
   );
 };

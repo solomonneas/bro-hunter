@@ -9,7 +9,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.config import settings
-from api.routers import analysis, logs, ingest, data, hunt, dns_threat, export, sessions, scoring, intel, reports, analytics, capture, workflow, search, packets, baseline, anomalies, cases, bundles, rules, sigma
+from api.routers import analysis, logs, ingest, data, hunt, dns_threat, export, sessions, scoring, intel, reports, analytics, capture, workflow, search, packets, baseline, anomalies, cases, bundles, rules, sigma, hosts, hunt_hypotheses, annotations, trends
 from api.routers import settings as settings_router
 from api.services.log_store import log_store
 from api.services.demo_data import DemoDataService
@@ -52,6 +52,11 @@ async def lifespan(application):
                 print(f"[STARTUP] Demo files: {list(svc.data_dir.iterdir())}", flush=True)
             stats = svc.load_into_store(log_store)
             print(f"[STARTUP] Demo loaded: {stats}", flush=True)
+
+            from api.services.trend_tracker import TrendTracker
+            tracker = TrendTracker()
+            if not tracker.list_snapshots():
+                tracker.seed_demo_trends()
         except Exception:
             print(f"[STARTUP] Failed to load demo data:\n{traceback.format_exc()}", flush=True)
     yield
@@ -108,6 +113,7 @@ app.include_router(reports.router, prefix=f"{settings.api_prefix}/reports", tags
 app.include_router(cases.router, prefix=f"{settings.api_prefix}/cases", tags=["cases"])
 app.include_router(bundles.router, prefix=f"{settings.api_prefix}/cases", tags=["bundles"])
 app.include_router(analytics.router, prefix=f"{settings.api_prefix}/analytics", tags=["analytics"])
+app.include_router(trends.router, prefix=f"{settings.api_prefix}/trends", tags=["trends"])
 app.include_router(capture.router, prefix=f"{settings.api_prefix}/capture", tags=["capture"])
 app.include_router(workflow.router, prefix=f"{settings.api_prefix}/workflow", tags=["workflow"])
 app.include_router(settings_router.router, prefix=f"{settings.api_prefix}/settings", tags=["settings"])
@@ -115,8 +121,11 @@ app.include_router(search.router, prefix=f"{settings.api_prefix}/search", tags=[
 app.include_router(packets.router, prefix=f"{settings.api_prefix}/packets", tags=["packets"])
 app.include_router(baseline.router, prefix=f"{settings.api_prefix}/baseline", tags=["baseline"])
 app.include_router(anomalies.router, prefix=f"{settings.api_prefix}/anomalies", tags=["anomalies"])
+app.include_router(hunt_hypotheses.router, prefix=f"{settings.api_prefix}/hypotheses", tags=["hypotheses"])
+app.include_router(annotations.router, prefix=f"{settings.api_prefix}/annotations", tags=["annotations"])
 app.include_router(rules.router, prefix=f"{settings.api_prefix}/rules", tags=["rules"])
 app.include_router(sigma.router, prefix=f"{settings.api_prefix}/sigma", tags=["sigma"])
+app.include_router(hosts.router, prefix=f"{settings.api_prefix}/hosts", tags=["hosts"])
 
 
 ## Demo data loading is handled via lifespan context manager above

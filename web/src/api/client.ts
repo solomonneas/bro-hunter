@@ -71,7 +71,7 @@ export async function apiFetch<T>(
   };
 
   if (config.authToken) {
-    headers['Authorization'] = `Bearer ${config.authToken}`;
+    headers['X-API-Key'] = config.authToken;
   }
 
   const controller = new AbortController();

@@ -5,9 +5,11 @@ import copy
 import os
 import json
 import logging
-from typing import Optional
-from fastapi import APIRouter, HTTPException
+from typing import Annotated, Optional
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
+
+from api.dependencies.auth import api_key_auth
 
 from api.config import settings as runtime_settings
 from api.services.log_store import log_store
@@ -97,7 +99,7 @@ async def get_settings():
 
 
 @router.put("")
-async def update_settings(update: SettingsUpdate):
+async def update_settings(update: SettingsUpdate, _: Annotated[str, Depends(api_key_auth)] = ""):
     """Update settings (partial merge)."""
     settings = _load_settings()
 
@@ -130,7 +132,7 @@ async def get_data_mode() -> dict:
 
 
 @router.put("/mode")
-async def set_data_mode(payload: dict) -> dict:
+async def set_data_mode(payload: dict, _: Annotated[str, Depends(api_key_auth)] = "") -> dict:
     """Switch runtime data mode between demo/live without restart."""
     demo_mode = bool(payload.get("demo_mode", False))
     try:

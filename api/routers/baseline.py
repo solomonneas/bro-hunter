@@ -1,6 +1,8 @@
 """Baseline profiling API endpoints."""
-from fastapi import APIRouter
+from typing import Annotated
+from fastapi import APIRouter, Depends
 
+from api.dependencies.auth import api_key_auth
 from api.services.log_store import log_store
 from api.services.baseline_profiler import BaselineProfiler
 
@@ -10,7 +12,7 @@ _baseline_profiler = BaselineProfiler(log_store)
 
 
 @router.post("/build")
-async def build_baseline():
+async def build_baseline(_: Annotated[str, Depends(api_key_auth)] = ""):
     """Build and persist a baseline profile from currently loaded logs."""
     baseline = _baseline_profiler.build_baseline()
     return {"status": "ok", "baseline": baseline}
@@ -26,6 +28,6 @@ async def get_baseline():
 
 
 @router.post("/compare")
-async def compare_baseline():
+async def compare_baseline(_: Annotated[str, Depends(api_key_auth)] = ""):
     """Compare current traffic against baseline and return deviations."""
     return _baseline_profiler.compare_against_baseline()

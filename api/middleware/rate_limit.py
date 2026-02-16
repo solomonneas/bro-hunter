@@ -26,11 +26,15 @@ _upload_log: dict[str, list[float]] = defaultdict(list)
 
 
 def _get_client_ip(request: Request) -> str:
-    """Extract client IP, respecting proxy headers."""
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "unknown"
+    """Extract client IP. Only trusts X-Forwarded-For when TRUSTED_PROXIES is set."""
+    trusted_proxies = os.environ.get("TRUSTED_PROXIES", "").split(",")
+    trusted_proxies = [p.strip() for p in trusted_proxies if p.strip()]
+    client_host = request.client.host if request.client else "unknown"
+    if trusted_proxies and client_host in trusted_proxies:
+        forwarded = request.headers.get("x-forwarded-for")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+    return client_host
 
 
 def _cleanup(entries: list[float], window: float) -> list[float]:

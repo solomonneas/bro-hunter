@@ -5,23 +5,13 @@ from collections import Counter
 from typing import Optional
 from fastapi import APIRouter, Query, HTTPException
 
-from api.services.log_store import LogStore
+from api.services.log_store import LogStore, log_store
 
 router = APIRouter()
 
-_log_store: Optional[LogStore] = None
-
-
-def set_log_store(store: LogStore):
-    """Wire up the shared LogStore instance."""
-    global _log_store
-    _log_store = store
-
 
 def _get_store() -> LogStore:
-    if _log_store is None:
-        return LogStore()
-    return _log_store
+    return log_store
 
 
 @router.get("")

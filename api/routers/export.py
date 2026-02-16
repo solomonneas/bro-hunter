@@ -11,26 +11,15 @@ from typing import Optional
 from fastapi import APIRouter, Query, Response
 from fastapi.responses import StreamingResponse
 
-from api.services.log_store import LogStore
+from api.services.log_store import LogStore, log_store
 from api.services.unified_threat_engine import UnifiedThreatEngine
 from api.models.threat import ThreatLevel
 
 router = APIRouter()
 
-# Shared log store instance (set during app startup)
-_log_store: Optional[LogStore] = None
-
-
-def set_log_store(store: LogStore):
-    global _log_store
-    _log_store = store
-
 
 def _get_engine() -> UnifiedThreatEngine:
-    if _log_store is None:
-        from api.services.log_store import LogStore
-        return UnifiedThreatEngine(LogStore())
-    return UnifiedThreatEngine(_log_store)
+    return UnifiedThreatEngine(log_store)
 
 
 def _severity_filter(level: ThreatLevel, min_severity: str) -> bool:

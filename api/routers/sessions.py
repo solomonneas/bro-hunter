@@ -4,24 +4,14 @@ Sessions Router - Reconstructed network session endpoints.
 from typing import Optional
 from fastapi import APIRouter, Query, HTTPException
 
-from api.services.log_store import LogStore
+from api.services.log_store import LogStore, log_store
 from api.services.session_reconstructor import SessionReconstructor
 
 router = APIRouter()
 
-_log_store: Optional[LogStore] = None
-
-
-def set_log_store(store: LogStore):
-    global _log_store
-    _log_store = store
-
 
 def _get_reconstructor() -> SessionReconstructor:
-    if _log_store is None:
-        from api.services.log_store import LogStore
-        return SessionReconstructor(LogStore())
-    return SessionReconstructor(_log_store)
+    return SessionReconstructor(log_store)
 
 
 @router.get("")

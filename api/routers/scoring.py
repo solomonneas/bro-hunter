@@ -8,7 +8,7 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from api.services.log_store import LogStore
+from api.services.log_store import LogStore, log_store as _log_store
 from api.services.unified_threat_engine import UnifiedThreatEngine
 
 router = APIRouter()
@@ -21,13 +21,6 @@ DEFAULT_WEIGHTS = {
     "ids_alert": 0.25,
     "long_connection": 0.20,
 }
-
-_log_store: Optional[LogStore] = None
-
-
-def set_log_store(store: LogStore):
-    global _log_store
-    _log_store = store
 
 
 class WeightsUpdate(BaseModel):
@@ -97,7 +90,7 @@ async def recalculate_scores():
     """Re-score all threats with current weights and return top 10 comparison."""
     weights = _load_weights()
 
-    if _log_store is None:
+    if not _log_store.connections and not _log_store.dns_queries and not _log_store.alerts:
         raise HTTPException(status_code=400, detail="No data loaded. Ingest logs first.")
 
     engine = UnifiedThreatEngine(_log_store)

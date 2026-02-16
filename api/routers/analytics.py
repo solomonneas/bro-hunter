@@ -6,23 +6,14 @@ from collections import defaultdict
 from datetime import datetime, timezone
 from fastapi import APIRouter, Query
 
-from api.services.log_store import LogStore
+from api.services.log_store import LogStore, log_store
 from api.services.unified_threat_engine import UnifiedThreatEngine
 
 router = APIRouter()
 
-_log_store: Optional[LogStore] = None
-
-
-def set_log_store(store: LogStore):
-    global _log_store
-    _log_store = store
-
 
 def _get_store() -> LogStore:
-    if _log_store is None:
-        return LogStore()
-    return _log_store
+    return log_store
 
 
 @router.get("/top-talkers")

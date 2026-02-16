@@ -149,6 +149,9 @@ class ZeekParser:
                     # Parse JSON line
                     data = json.loads(line)
 
+                    # Normalize Zeek dot-notation keys (e.g. id.orig_h -> id_orig_h)
+                    data = {k.replace(".", "_"): v for k, v in data.items()}
+
                     # Validate and create model instance
                     entry = model_class(**data)
                     yield entry
@@ -197,6 +200,7 @@ class ZeekParser:
 
         try:
             data = json.loads(line)
+            data = {k.replace(".", "_"): v for k, v in data.items()}
             return model_class(**data)
         except Exception as e:
             logger.warning(f"Failed to parse line: {e}")
@@ -220,7 +224,8 @@ class ZeekParser:
         model_class = ZeekParser.LOG_TYPE_MODELS[log_type]
 
         try:
-            model_class(**data)
+            normalized = {k.replace(".", "_"): v for k, v in data.items()}
+            model_class(**normalized)
             return True
         except Exception:
             return False

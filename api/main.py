@@ -100,7 +100,11 @@ app.include_router(sigma.router, prefix=f"{settings.api_prefix}/sigma", tags=["s
 @app.on_event("startup")
 async def bootstrap_demo_data():
     """Auto-load bundled sanitized demo data when BROHUNTER_DEMO_MODE=true."""
-    if getattr(settings, "demo_mode", False):
+    import os
+    raw_env = os.environ.get("BROHUNTER_DEMO_MODE", "unset")
+    demo = getattr(settings, "demo_mode", False)
+    logger.info("Demo check: env=%s, settings.demo_mode=%s", raw_env, demo)
+    if demo or raw_env.lower() in ("true", "1", "yes"):
         stats = DemoDataService().load_into_store(log_store)
         logger.info("Demo mode enabled. Loaded demo dataset: %s", stats)
 

@@ -1,6 +1,7 @@
 """
 Workflow Router: PCAP upload-and-analyze pipeline.
 """
+import os
 import shutil
 import tempfile
 from typing import Annotated, Optional
@@ -63,8 +64,9 @@ async def upload_and_analyze(request: Request, file: UploadFile = File(...), _: 
 
     # Stream file data to temp file with size limit enforcement
     max_size = 100 * 1024 * 1024
+    tmp = None
     try:
-        tmp = tempfile.SpooledTemporaryFile(max_size=max_size)
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pcap")
         total = 0
         while True:
             chunk = await file.read(64 * 1024)
@@ -72,13 +74,17 @@ async def upload_and_analyze(request: Request, file: UploadFile = File(...), _: 
                 break
             total += len(chunk)
             if total > max_size:
-                tmp.close()
                 raise HTTPException(status_code=413, detail="File exceeds 100MB limit")
             tmp.write(chunk)
         tmp.seek(0)
         data = tmp.read()
-        tmp.close()
     finally:
+        if tmp is not None:
+            tmp.close()
+            try:
+                os.unlink(tmp.name)
+            except OSError:
+                pass
         await file.close()
 
     manager = _get_manager()

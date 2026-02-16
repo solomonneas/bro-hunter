@@ -16,9 +16,9 @@ async def create_case(payload: dict[str, Any], _: Annotated[str, Depends(api_key
     try:
         return case_manager.create_case(payload)
     except KeyError as exc:
-        raise HTTPException(status_code=400, detail=f"Missing required field: {exc}")
+        raise HTTPException(status_code=400, detail=f"Missing required field: {exc}") from exc
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("")
@@ -36,7 +36,7 @@ async def get_case(case_id: str):
     try:
         return case_manager.get_case(case_id)
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.put("/{case_id}")
@@ -44,9 +44,9 @@ async def update_case(case_id: str, payload: dict[str, Any], _: Annotated[str, D
     try:
         return case_manager.update_case(case_id, payload)
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.delete("/{case_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -54,7 +54,7 @@ async def delete_case(case_id: str, _: Annotated[str, Depends(api_key_auth)] = "
     try:
         case_manager.delete_case(case_id)
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.post("/{case_id}/findings", status_code=status.HTTP_201_CREATED)
@@ -62,11 +62,11 @@ async def add_finding(case_id: str, payload: dict[str, Any], _: Annotated[str, D
     try:
         return case_manager.add_finding(case_id, payload)
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     except KeyError as exc:
-        raise HTTPException(status_code=400, detail=f"Missing required field: {exc}")
+        raise HTTPException(status_code=400, detail=f"Missing required field: {exc}") from exc
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.post("/{case_id}/notes", status_code=status.HTTP_201_CREATED)
@@ -74,9 +74,9 @@ async def add_note(case_id: str, payload: dict[str, Any], _: Annotated[str, Depe
     try:
         return case_manager.add_note(case_id, payload)
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     except KeyError as exc:
-        raise HTTPException(status_code=400, detail=f"Missing required field: {exc}")
+        raise HTTPException(status_code=400, detail=f"Missing required field: {exc}") from exc
 
 
 @router.put("/{case_id}/notes/{note_id}")
@@ -84,7 +84,7 @@ async def update_note(case_id: str, note_id: str, payload: dict[str, Any], _: An
     try:
         return case_manager.update_note(case_id, note_id, payload)
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 
 @router.post("/{case_id}/iocs", status_code=status.HTTP_201_CREATED)
@@ -92,11 +92,11 @@ async def add_ioc(case_id: str, payload: dict[str, Any], _: Annotated[str, Depen
     try:
         return case_manager.add_ioc(case_id, payload)
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
     except KeyError as exc:
-        raise HTTPException(status_code=400, detail=f"Missing required field: {exc}")
+        raise HTTPException(status_code=400, detail=f"Missing required field: {exc}") from exc
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc))
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
 
 
 @router.get("/{case_id}/timeline")
@@ -104,4 +104,4 @@ async def get_timeline(case_id: str):
     try:
         return case_manager.get_timeline(case_id)
     except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail=str(exc))
+        raise HTTPException(status_code=404, detail=str(exc)) from exc

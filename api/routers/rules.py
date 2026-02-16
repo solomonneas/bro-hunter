@@ -28,7 +28,7 @@ def _validate_regex_conditions(payload):
             try:
                 re.compile(str(value))
             except re.error as e:
-                raise HTTPException(status_code=400, detail=f"Invalid regex pattern: {e}")
+                raise HTTPException(status_code=400, detail=f"Invalid regex pattern: {e}") from e
 
 
 @router.get("")

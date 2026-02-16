@@ -93,14 +93,16 @@ async def traffic_timeline(bucket_minutes: int = Query(5, ge=1, le=60)):
 
     for conn in store.connections:
         if conn.timestamp:
-            bucket_ts = int(conn.timestamp / bucket_seconds) * bucket_seconds
+            ts_epoch = conn.timestamp.timestamp() if hasattr(conn.timestamp, 'timestamp') else float(conn.timestamp)
+            bucket_ts = int(ts_epoch / bucket_seconds) * bucket_seconds
             buckets[bucket_ts]["connections"] += 1
             buckets[bucket_ts]["bytes"] += (conn.bytes_sent or 0) + (conn.bytes_recv or 0)
 
     for alert in store.alerts:
-        ts = alert.timestamp or 0.0
-        if ts:
-            bucket_ts = int(ts / bucket_seconds) * bucket_seconds
+        ts_raw = alert.timestamp
+        if ts_raw:
+            ts_epoch = ts_raw.timestamp() if hasattr(ts_raw, 'timestamp') else float(ts_raw)
+            bucket_ts = int(ts_epoch / bucket_seconds) * bucket_seconds
             buckets[bucket_ts]["alerts"] += 1
 
     sorted_buckets = sorted(buckets.items())

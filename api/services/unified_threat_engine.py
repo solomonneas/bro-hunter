@@ -39,6 +39,15 @@ from api.services.log_store import LogStore
 from api.config.mitre_framework import mitre_framework
 
 
+def _get_score(obj) -> float:
+    """Extract score from any threat object, handling different score field names."""
+    for attr in ('score', 'tunneling_score', 'dga_score', 'fast_flux_score', 'suspicion_score'):
+        val = getattr(obj, attr, None)
+        if val is not None:
+            return float(val)
+    return 0.0
+
+
 @dataclass
 class HostThreatProfile:
     """Complete threat profile for a host."""
@@ -167,11 +176,11 @@ class UnifiedThreatEngine:
 
         for src_ip, queries in dns_queries_by_src.items():
             # Tunneling
-            tunneling = self.dns_analyzer.detect_tunneling(queries)
+            tunneling = self.dns_analyzer.detect_dns_tunneling(queries)
             self._dns_threats["tunneling"].extend(tunneling)
 
             # DGA
-            dga = self.dns_analyzer.detect_dga(queries)
+            dga = self.dns_analyzer.detect_dga_domains(queries)
             self._dns_threats["dga"].extend(dga)
 
             # Fast-flux
@@ -216,7 +225,7 @@ class UnifiedThreatEngine:
                 "timestamp": beacon.first_seen,
                 "type": "beacon",
                 "description": f"C2 beacon to {beacon.dst_ip}:{beacon.dst_port}",
-                "score": beacon.score,
+                "score": beacon.beacon_score,
             })
 
         # Process DNS threats
@@ -244,7 +253,7 @@ class UnifiedThreatEngine:
                     "timestamp": timestamp,
                     "type": f"dns_{threat_type}",
                     "description": self._describe_dns_threat(threat_type, threat),
-                    "score": threat.score,
+                    "score": _get_score(threat),
                 })
 
                 self._update_temporal_bounds(profile, timestamp, timestamp)
@@ -355,12 +364,12 @@ class UnifiedThreatEngine:
 
         # Beacon scores (0-100 scale)
         for beacon in profile.beacons:
-            scores.append(beacon.score / 100.0)
+            scores.append(beacon.beacon_score / 100.0)
 
         # DNS threat scores (0-100 scale)
         for dns_threat in profile.dns_threats:
             threat_data = dns_threat["data"]
-            scores.append(threat_data.score / 100.0)
+            scores.append(_get_score(threat_data) / 100.0)
 
         # Alert scores (0-100 scale)
         for alert_score in profile.alerts:
@@ -474,15 +483,28 @@ class UnifiedThreatEngine:
             threat_data = dns_threat["data"]
             threat_type = dns_threat["type"]
             domain = getattr(threat_data, "domain", "unknown")
-            indicators.append(ThreatIndicator(
-                indicator_type=f"dns_{threat_type}",
-                value=domain,
-                severity=threat_data.threat_level,
-                confidence=threat_data.confidence,
-                context=f"DNS {threat_type} detected",
-                first_seen=getattr(threat_data, "first_seen", 0.0),
-                last_seen=getattr(threat_data, "last_seen", 0.0),
-            ))
+            score_val = _get_score(threat_data)
+            # Map score to threat level
+            if score_val >= 80:
+                dns_level = ThreatLevel.CRITICAL
+            elif score_val >= 60:
+                dns_level = ThreatLevel.HIGH
+            elif score_val >= 40:
+                dns_level = ThreatLevel.MEDIUM
+            else:
+                dns_level = ThreatLevel.LOW
+            try:
+                indicators.append(ThreatIndicator(
+                    indicator_type="behavior",
+                    value=domain,
+                    severity=getattr(threat_data, 'threat_level', dns_level),
+                    confidence=getattr(threat_data, 'confidence', 0.5),
+                    context=f"DNS {threat_type} detected",
+                    first_seen=getattr(threat_data, "first_seen", 0.0),
+                    last_seen=getattr(threat_data, "last_seen", 0.0),
+                ))
+            except Exception:
+                pass  # Skip malformed DNS indicators
 
         # Alert indicators (top 5 by score)
         top_alerts = sorted(profile.alerts, key=lambda x: x.score, reverse=True)[:5]
@@ -629,7 +651,7 @@ class UnifiedThreatEngine:
             if profile.beacon_count > 0 and profile.dns_threat_count > 0:
                 dns_exfil = [
                     t for t in profile.dns_threats
-                    if t["type"] == "tunneling" and t["data"].score >= 70
+                    if t["type"] == "tunneling" and _get_score(t["data"]) >= 70
                 ]
                 if dns_exfil:
                     correlations.append(ThreatCorrelation(

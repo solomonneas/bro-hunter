@@ -41,7 +41,7 @@ DEFAULT_SETTINGS = {
         "theme": "v3",
         "rows_per_page": 50,
         "auto_refresh_seconds": 30,
-        "data_mode": "demo" if runtime_settings.demo_mode else "live",
+        "data_mode": "demo" if getattr(runtime_settings, "demo_mode", False) else "live",
     },
 }
 

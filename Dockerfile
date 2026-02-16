@@ -16,8 +16,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY package*.json tailwind.config.* tsconfig.* ./
 COPY web/ ./web/
 RUN npm install \
-    && npx vite build --config web/vite.config.ts --outDir web/dist web \
-    && rm -rf node_modules
+    && cd web && npx vite build \
+    && cd .. && rm -rf node_modules
 
 # Backend
 COPY api/ ./api/

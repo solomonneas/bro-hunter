@@ -19,6 +19,10 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ item, onUpdated }) => {
   const statusOptions = ['open', 'investigating', 'escalated', 'resolved', 'closed'];
   const severityOptions = ['low', 'medium', 'high', 'critical'];
 
+  useEffect(() => {
+    setTagsInput((item.tags || []).join(', '));
+  }, [item.id, item.tags]);
+
   const saveMeta = async (patch: Record<string, any>) => {
     const res = await fetch(`${API_BASE}/api/v1/cases/${item.id}`, {
       method: 'PUT',
@@ -76,9 +80,9 @@ const CaseDetail: React.FC<CaseDetailProps> = ({ item, onUpdated }) => {
           <input
             className="v3-input"
             placeholder="Comma-separated tags"
-            value={(item.tags || []).join(', ')}
+            value={tagsInput}
             onBlur={(e) => saveMeta({ tags: e.target.value.split(',').map((t) => t.trim()).filter(Boolean) })}
-            onChange={() => null}
+            onChange={(e) => setTagsInput(e.target.value)}
           />
         </div>
       </div>

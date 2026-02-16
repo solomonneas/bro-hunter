@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     # CORS Configuration
     cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]
 
+    # Runtime Mode
+    demo_mode: bool = False
+
     # File Processing
     max_file_size: int = 100 * 1024 * 1024  # 100MB
     chunk_size: int = 8192  # For streaming large files

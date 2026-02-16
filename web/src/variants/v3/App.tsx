@@ -29,6 +29,7 @@ import {
   Antenna,
   Upload,
   Settings as SettingsIcon,
+  Binary,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { mockDashboardStats } from '../../data/mockData';
@@ -47,6 +48,7 @@ import Capture from './pages/Capture';
 import Reports from './pages/Reports';
 import Workflow from './pages/Workflow';
 import Settings from './pages/Settings';
+import Packets from './pages/Packets';
 import GlobalSearch from '../../components/GlobalSearch';
 import NotificationToast from '../../components/NotificationToast';
 import './styles.css';
@@ -67,6 +69,7 @@ function buildNav(base: string) {
     { to: `${b}/hunts`, icon: Search, label: 'Hunt Results', end: false },
     { to: `${b}/timeline`, icon: ListTree, label: 'Threat Timeline', end: false },
     { to: `${b}/sessions`, icon: Link2, label: 'Sessions', end: false },
+    { to: `${b}/packets`, icon: Binary, label: 'Packets', end: false },
     { to: `${b}/analytics`, icon: BarChart3, label: 'Analytics', end: false },
     { to: `${b}/intel`, icon: Crosshair, label: 'Threat Intel', end: false },
     { to: `${b}/capture`, icon: Antenna, label: 'Live Capture', end: false },
@@ -81,8 +84,8 @@ function buildBreadcrumbs(base: string): Record<string, string> {
   const b = base === '/' ? '' : base;
   const map: Record<string, string> = {};
   map[base] = 'Dashboard';
-  const pages = ['connections', 'beacons', 'dns', 'threats', 'hunts', 'timeline', 'sessions', 'analytics', 'intel', 'capture', 'reports', 'workflow', 'settings', 'tuning'];
-  const labels = ['Connections', 'Beacons', 'DNS Threats', 'Threats', 'Hunt Results', 'Threat Timeline', 'Sessions', 'Analytics', 'Threat Intel', 'Live Capture', 'Reports', 'PCAP Workflow', 'Settings', 'Tuning'];
+  const pages = ['connections', 'beacons', 'dns', 'threats', 'hunts', 'timeline', 'sessions', 'packets', 'analytics', 'intel', 'capture', 'reports', 'workflow', 'settings', 'tuning'];
+  const labels = ['Connections', 'Beacons', 'DNS Threats', 'Threats', 'Hunt Results', 'Threat Timeline', 'Sessions', 'Packets', 'Analytics', 'Threat Intel', 'Live Capture', 'Reports', 'PCAP Workflow', 'Settings', 'Tuning'];
   pages.forEach((p, i) => { map[`${b}/${p}`] = labels[i]; });
   return map;
 }
@@ -218,6 +221,7 @@ const V3App: React.FC<V3AppProps> = ({ basePath = '/' }) => {
           <Route path="hunts" element={<HuntResults />} />
           <Route path="timeline" element={<TimelinePage />} />
           <Route path="sessions" element={<Sessions />} />
+          <Route path="packets" element={<Packets />} />
           <Route path="analytics" element={<Analytics />} />
           <Route path="intel" element={<Intel />} />
           <Route path="capture" element={<Capture />} />

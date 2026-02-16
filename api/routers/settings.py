@@ -9,6 +9,10 @@ from typing import Optional
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
+from api.config import settings as runtime_settings
+from api.services.log_store import log_store
+from api.services.demo_data import DemoDataService
+
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
@@ -37,6 +41,7 @@ DEFAULT_SETTINGS = {
         "theme": "v3",
         "rows_per_page": 50,
         "auto_refresh_seconds": 30,
+        "data_mode": "demo" if runtime_settings.demo_mode else "live",
     },
 }
 
@@ -116,3 +121,27 @@ async def update_settings(update: SettingsUpdate):
 
     _save_settings(settings)
     return {"status": "saved"}
+
+
+@router.get("/mode")
+async def get_data_mode() -> dict:
+    """Get current runtime data mode."""
+    return {"demo_mode": runtime_settings.demo_mode}
+
+
+@router.put("/mode")
+async def set_data_mode(payload: dict) -> dict:
+    """Switch runtime data mode between demo/live without restart."""
+    demo_mode = bool(payload.get("demo_mode", False))
+    runtime_settings.demo_mode = demo_mode
+
+    persisted = _load_settings()
+    persisted.setdefault("display", {})["data_mode"] = "demo" if demo_mode else "live"
+    _save_settings(persisted)
+
+    if demo_mode:
+        stats = DemoDataService().load_into_store(log_store)
+        return {"status": "ok", "demo_mode": True, "stats": stats}
+
+    log_store.clear()
+    return {"status": "ok", "demo_mode": False}

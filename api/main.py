@@ -9,8 +9,10 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.config import settings
-from api.routers import analysis, logs, ingest, data, hunt, dns_threat, export, sessions, scoring, intel, reports, analytics, capture, workflow, search
+from api.routers import analysis, logs, ingest, data, hunt, dns_threat, export, sessions, scoring, intel, reports, analytics, capture, workflow, search, packets
 from api.routers import settings as settings_router
+from api.services.log_store import log_store
+from api.services.demo_data import DemoDataService
 
 logger = logging.getLogger(__name__)
 
@@ -57,6 +59,7 @@ async def root():
         "name": settings.app_name,
         "version": settings.app_version,
         "status": "operational",
+        "demo_mode": settings.demo_mode,
     }
 
 
@@ -85,6 +88,15 @@ app.include_router(capture.router, prefix=f"{settings.api_prefix}/capture", tags
 app.include_router(workflow.router, prefix=f"{settings.api_prefix}/workflow", tags=["workflow"])
 app.include_router(settings_router.router, prefix=f"{settings.api_prefix}/settings", tags=["settings"])
 app.include_router(search.router, prefix=f"{settings.api_prefix}/search", tags=["search"])
+app.include_router(packets.router, prefix=f"{settings.api_prefix}/packets", tags=["packets"])
+
+
+@app.on_event("startup")
+async def bootstrap_demo_data():
+    """Auto-load bundled sanitized demo data when BROHUNTER_DEMO_MODE=true."""
+    if settings.demo_mode:
+        stats = DemoDataService().load_into_store(log_store)
+        logger.info("Demo mode enabled. Loaded demo dataset: %s", stats)
 
 
 # Serve frontend static files in production

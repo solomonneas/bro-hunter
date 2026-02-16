@@ -2,8 +2,9 @@
  * Settings page: API keys, scoring weights, display preferences.
  */
 import React, { useState, useEffect } from 'react';
-import { Save, Loader2, CheckCircle, Eye, EyeOff } from 'lucide-react';
+import { Save, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useNotificationStore } from '../../../stores/notificationStore';
+import LoadingSkeleton from '../../../components/LoadingSkeleton';
 
 const API_BASE = import.meta.env.VITE_API_BASE || '';
 
@@ -39,6 +40,7 @@ const Settings: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [showOtx, setShowOtx] = useState(false);
   const [showAbuse, setShowAbuse] = useState(false);
+  const [demoMode, setDemoMode] = useState(false);
   const notify = useNotificationStore.add;
 
   useEffect(() => {
@@ -47,8 +49,15 @@ const Settings: React.FC = () => {
 
   const fetchSettings = async () => {
     try {
-      const res = await fetch(`${API_BASE}/api/v1/settings`);
+      const [res, modeRes] = await Promise.all([
+        fetch(`${API_BASE}/api/v1/settings`),
+        fetch(`${API_BASE}/api/v1/settings/mode`),
+      ]);
       if (res.ok) setSettings(await res.json());
+      if (modeRes.ok) {
+        const mode = await modeRes.json();
+        setDemoMode(Boolean(mode.demo_mode));
+      }
     } catch (err) {
       console.error('Failed to load settings:', err);
     } finally {
@@ -77,6 +86,24 @@ const Settings: React.FC = () => {
     }
   };
 
+  const toggleDataMode = async (nextDemoMode: boolean) => {
+    try {
+      const res = await fetch(`${API_BASE}/api/v1/settings/mode`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ demo_mode: nextDemoMode }),
+      });
+      if (res.ok) {
+        setDemoMode(nextDemoMode);
+        notify('success', nextDemoMode ? 'Demo mode enabled' : 'Live mode enabled');
+      } else {
+        notify('error', 'Failed to switch data mode');
+      }
+    } catch {
+      notify('error', 'Network error switching data mode');
+    }
+  };
+
   const updateNested = (section: keyof AppSettings, key: string, value: any) => {
     if (!settings) return;
     setSettings({
@@ -86,11 +113,7 @@ const Settings: React.FC = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center py-20">
-        <Loader2 size={24} className="animate-spin text-cyan-500" />
-      </div>
-    );
+    return <LoadingSkeleton rows={8} className="py-8" />;
   }
 
   if (!settings) {
@@ -116,6 +139,25 @@ const Settings: React.FC = () => {
           {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
           Save
         </button>
+      </div>
+
+      <div className={sectionClass}>
+        <h3 className="text-base font-medium text-gray-200">Data Mode</h3>
+        <p className="text-sm text-gray-500">Demo mode uses bundled sanitized Zeek logs. Live mode expects local Zeek/Suricata ingestion.</p>
+        <div className="flex gap-2">
+          <button
+            onClick={() => toggleDataMode(true)}
+            className={`px-3 py-2 rounded-lg text-sm border ${demoMode ? 'border-cyan-500 bg-cyan-500/20 text-cyan-300' : 'border-gray-700 text-gray-400'}`}
+          >
+            Demo Mode
+          </button>
+          <button
+            onClick={() => toggleDataMode(false)}
+            className={`px-3 py-2 rounded-lg text-sm border ${!demoMode ? 'border-cyan-500 bg-cyan-500/20 text-cyan-300' : 'border-gray-700 text-gray-400'}`}
+          >
+            Live Mode
+          </button>
+        </div>
       </div>
 
       {/* Threat Intel */}

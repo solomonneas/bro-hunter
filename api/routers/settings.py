@@ -126,14 +126,17 @@ async def update_settings(update: SettingsUpdate):
 @router.get("/mode")
 async def get_data_mode() -> dict:
     """Get current runtime data mode."""
-    return {"demo_mode": runtime_settings.demo_mode}
+    return {"demo_mode": getattr(runtime_settings, "demo_mode", False)}
 
 
 @router.put("/mode")
 async def set_data_mode(payload: dict) -> dict:
     """Switch runtime data mode between demo/live without restart."""
     demo_mode = bool(payload.get("demo_mode", False))
-    runtime_settings.demo_mode = demo_mode
+    try:
+        runtime_settings.demo_mode = demo_mode
+    except (AttributeError, ValueError):
+        pass  # pydantic frozen model
 
     persisted = _load_settings()
     persisted.setdefault("display", {})["data_mode"] = "demo" if demo_mode else "live"

@@ -59,7 +59,7 @@ async def root():
         "name": settings.app_name,
         "version": settings.app_version,
         "status": "operational",
-        "demo_mode": settings.demo_mode,
+        "demo_mode": getattr(settings, "demo_mode", False),
     }
 
 
@@ -100,7 +100,7 @@ app.include_router(sigma.router, prefix=f"{settings.api_prefix}/sigma", tags=["s
 @app.on_event("startup")
 async def bootstrap_demo_data():
     """Auto-load bundled sanitized demo data when BROHUNTER_DEMO_MODE=true."""
-    if settings.demo_mode:
+    if getattr(settings, "demo_mode", False):
         stats = DemoDataService().load_into_store(log_store)
         logger.info("Demo mode enabled. Loaded demo dataset: %s", stats)
 

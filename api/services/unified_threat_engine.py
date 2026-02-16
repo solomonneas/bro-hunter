@@ -25,7 +25,7 @@ from api.models.beacon import BeaconResult
 from api.models.dns_threat import (
     DnsTunnelingResult,
     DgaResult,
-    FastFluxResult,
+    DnsFastFluxResult,
     SuspiciousDnsPattern,
 )
 from api.services.beacon_analyzer import BeaconAnalyzer

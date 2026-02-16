@@ -1010,8 +1010,10 @@
   .v3-header {
     padding: 0 12px;
   }
-  .v3-main {
+  .v3-main,
+  .v3-content {
     padding: 12px;
+    overflow-x: hidden;
   }
   .v3-breadcrumb {
     font-size: 12px;
@@ -1062,9 +1064,14 @@
 /* Mobile nav overlay */
 .v3-mobile-overlay {
   position: fixed;
-  inset: 0;
-  z-index: 1000;
-  background: rgba(0, 0, 0, 0.6);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 9999;
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
 }
 
@@ -1075,10 +1082,11 @@
   bottom: 0;
   width: 280px;
   max-width: 85vw;
-  background: var(--v3-bg-card);
-  border-right: 1px solid var(--v3-border);
+  height: 100vh;
+  background: #0f1117;
+  border-right: 1px solid rgba(255,255,255,0.1);
   overflow-y: auto;
-  z-index: 1001;
+  z-index: 10000;
   animation: v3-slide-in 0.2s ease;
 }
 

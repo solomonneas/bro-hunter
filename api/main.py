@@ -35,11 +35,33 @@ if not settings.api_key:
     )
 
 
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(application):
+    """Startup: load demo data if enabled."""
+    import os, traceback
+    raw_env = os.environ.get("BROHUNTER_DEMO_MODE", "unset")
+    demo = getattr(settings, "demo_mode", False)
+    print(f"[STARTUP] Demo check: env={raw_env}, settings.demo_mode={demo}", flush=True)
+    if demo or str(raw_env).lower() in ("true", "1", "yes"):
+        try:
+            svc = DemoDataService()
+            print(f"[STARTUP] Demo data dir: {svc.data_dir}, exists: {svc.data_dir.exists()}", flush=True)
+            if svc.data_dir.exists():
+                print(f"[STARTUP] Demo files: {list(svc.data_dir.iterdir())}", flush=True)
+            stats = svc.load_into_store(log_store)
+            print(f"[STARTUP] Demo loaded: {stats}", flush=True)
+        except Exception:
+            print(f"[STARTUP] Failed to load demo data:\n{traceback.format_exc()}", flush=True)
+    yield
+
 # Initialize FastAPI app
 app = FastAPI(
     title=settings.app_name,
     version=settings.app_version,
     description="Network threat hunting and analysis platform for Zeek (Bro) and Suricata logs",
+    lifespan=lifespan,
 )
 
 # Configure CORS
@@ -97,23 +119,7 @@ app.include_router(rules.router, prefix=f"{settings.api_prefix}/rules", tags=["r
 app.include_router(sigma.router, prefix=f"{settings.api_prefix}/sigma", tags=["sigma"])
 
 
-@app.on_event("startup")
-async def bootstrap_demo_data():
-    """Auto-load bundled sanitized demo data when BROHUNTER_DEMO_MODE=true."""
-    import os, traceback
-    raw_env = os.environ.get("BROHUNTER_DEMO_MODE", "unset")
-    demo = getattr(settings, "demo_mode", False)
-    logger.info("Demo check: env=%s, settings.demo_mode=%s", raw_env, demo)
-    if demo or raw_env.lower() in ("true", "1", "yes"):
-        try:
-            svc = DemoDataService()
-            logger.info("Demo data dir: %s, exists: %s", svc.data_dir, svc.data_dir.exists())
-            if svc.data_dir.exists():
-                logger.info("Demo files: %s", list(svc.data_dir.iterdir()))
-            stats = svc.load_into_store(log_store)
-            logger.info("Demo mode enabled. Loaded demo dataset: %s", stats)
-        except Exception:
-            logger.error("Failed to load demo data:\n%s", traceback.format_exc())
+## Demo data loading is handled via lifespan context manager above
 
 
 # Serve frontend static files in production

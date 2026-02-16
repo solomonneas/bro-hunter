@@ -116,6 +116,40 @@ The backend parses and indexes them for fast querying.
 
 ---
 
+## Rate Limiting
+
+PCAP uploads are rate-limited by default to prevent abuse on public deployments:
+
+- **5 uploads per hour** per IP
+- **15 uploads per day** per IP
+
+### Configuration
+
+Control rate limiting via environment variables:
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `BROHUNTER_RATE_LIMIT_ENABLED` | `true` | Set to `false` to disable rate limiting entirely |
+| `BROHUNTER_RATE_LIMIT_HOURLY` | `5` | Max uploads per hour per IP |
+| `BROHUNTER_RATE_LIMIT_DAILY` | `15` | Max uploads per day per IP |
+
+### Self-Hosted / Cloned Deployments
+
+If you're running Bro Hunter on your own infrastructure and don't need rate limiting:
+
+```bash
+# Disable rate limiting entirely
+export BROHUNTER_RATE_LIMIT_ENABLED=false
+
+# Or increase the limits
+export BROHUNTER_RATE_LIMIT_HOURLY=100
+export BROHUNTER_RATE_LIMIT_DAILY=500
+```
+
+In Docker / Railway, set these as environment variables in your deployment config.
+
+---
+
 ## License
 
 MIT - see [LICENSE](LICENSE) for details.

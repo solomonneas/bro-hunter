@@ -2,7 +2,9 @@
 Workflow Router: PCAP upload-and-analyze pipeline.
 """
 from typing import Optional
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query
+from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Request
+
+from api.middleware.rate_limit import check_rate_limit, record_upload
 
 from api.services.workflow_manager import WorkflowManager
 
@@ -34,8 +36,17 @@ def _serialize_job(job) -> dict:
 
 
 @router.post("/upload-and-analyze")
-async def upload_and_analyze(file: UploadFile = File(...)):
+async def upload_and_analyze(request: Request, file: UploadFile = File(...)):
     """Upload a PCAP file and run the full analysis pipeline."""
+    # Rate limit check
+    blocked = check_rate_limit(request)
+    if blocked:
+        raise HTTPException(
+            status_code=429,
+            detail=blocked["detail"],
+            headers={"Retry-After": str(blocked.get("retry_after", 3600))},
+        )
+
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
 
@@ -63,6 +74,7 @@ async def upload_and_analyze(file: UploadFile = File(...)):
 
     manager = _get_manager()
     job = manager.create_job(file.filename, data)
+    record_upload(request)
     return _serialize_job(job)
 
 

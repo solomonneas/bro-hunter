@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Frontend: install deps at root, build from web/
 COPY package*.json tailwind.config.* tsconfig.* ./
 COPY web/ ./web/
-RUN npm ci \
+RUN npm install \
     && npx vite build --config web/vite.config.ts --outDir web/dist web \
     && rm -rf node_modules
 

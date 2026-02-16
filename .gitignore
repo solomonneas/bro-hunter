@@ -32,6 +32,7 @@ id_ed25519*
 
 # Logs
 *.log
+!data/demo/*.log
 logs/
 
 # OS files

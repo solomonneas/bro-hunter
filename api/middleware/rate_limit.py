@@ -21,16 +21,22 @@ RATE_LIMIT_ENABLED = os.environ.get("BROHUNTER_RATE_LIMIT_ENABLED", "true").lowe
 RATE_LIMIT_HOURLY = int(os.environ.get("BROHUNTER_RATE_LIMIT_HOURLY", "5"))
 RATE_LIMIT_DAILY = int(os.environ.get("BROHUNTER_RATE_LIMIT_DAILY", "15"))
 
+# Trusted proxy IPs that are allowed to set X-Forwarded-For (parsed once at import)
+_trusted_proxies_raw = os.environ.get("TRUSTED_PROXIES", "").split(",")
+TRUSTED_PROXIES: set[str] = {p.strip() for p in _trusted_proxies_raw if p.strip()}
+
 # In-memory store: IP -> list of timestamps
 _upload_log: dict[str, list[float]] = defaultdict(list)
 
 
 def _get_client_ip(request: Request) -> str:
-    """Extract client IP, respecting proxy headers."""
-    forwarded = request.headers.get("x-forwarded-for")
-    if forwarded:
-        return forwarded.split(",")[0].strip()
-    return request.client.host if request.client else "unknown"
+    """Extract client IP. Only trusts X-Forwarded-For when TRUSTED_PROXIES is set."""
+    client_host = request.client.host if request.client else "unknown"
+    if TRUSTED_PROXIES and client_host in TRUSTED_PROXIES:
+        forwarded = request.headers.get("x-forwarded-for")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+    return client_host
 
 
 def _cleanup(entries: list[float], window: float) -> list[float]:

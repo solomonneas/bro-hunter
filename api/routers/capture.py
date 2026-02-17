@@ -2,10 +2,11 @@
 Live Capture Router - Start/stop/manage packet capture sessions.
 """
 import time
-from typing import Optional
-from fastapi import APIRouter, Query, HTTPException
+from typing import Annotated, Optional
+from fastapi import APIRouter, Depends, Query, HTTPException
 from pydantic import BaseModel
 
+from api.dependencies.auth import api_key_auth
 from api.services.live_capture import LiveCaptureService
 
 router = APIRouter()
@@ -35,7 +36,7 @@ async def list_interfaces():
 
 
 @router.post("/start")
-async def start_capture(req: StartCaptureRequest):
+async def start_capture(req: StartCaptureRequest, _: Annotated[str, Depends(api_key_auth)] = ""):
     """Start a live packet capture session."""
     service = _get_service()
 
@@ -55,7 +56,7 @@ async def start_capture(req: StartCaptureRequest):
 
 
 @router.post("/stop/{session_id}")
-async def stop_capture(session_id: str):
+async def stop_capture(session_id: str, _: Annotated[str, Depends(api_key_auth)] = ""):
     """Stop a running capture session."""
     service = _get_service()
     session = service.stop_capture(session_id)
@@ -86,7 +87,7 @@ async def get_capture(session_id: str):
 
 
 @router.post("/ingest/{session_id}")
-async def ingest_capture(session_id: str):
+async def ingest_capture(session_id: str, _: Annotated[str, Depends(api_key_auth)] = ""):
     """Ingest a stopped capture into the analysis pipeline (uses existing PCAP ingest)."""
     service = _get_service()
     session = service.get_session(session_id)
@@ -111,7 +112,7 @@ async def ingest_capture(session_id: str):
 
 
 @router.delete("/sessions/{session_id}")
-async def delete_capture(session_id: str):
+async def delete_capture(session_id: str, _: Annotated[str, Depends(api_key_auth)] = ""):
     """Delete a capture session and its files."""
     service = _get_service()
     session = service.get_session(session_id)

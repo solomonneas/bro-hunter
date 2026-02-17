@@ -139,9 +139,22 @@ if os.path.isdir(_frontend_dir):
     @app.get("/{full_path:path}")
     async def serve_frontend(full_path: str):
         """Serve frontend SPA — all non-API routes fall through to index.html."""
-        file_path = os.path.join(_frontend_dir, full_path)
-        if full_path and os.path.isfile(file_path):
-            return FileResponse(file_path)
+        from pathlib import Path
+        base = Path(_frontend_dir).resolve()
+        candidate = base / full_path
+        # Check boundary before touching the filesystem (no info leak via timing)
+        try:
+            candidate.relative_to(base)
+        except ValueError:
+            return FileResponse(os.path.join(_frontend_dir, "index.html"))
+        # Reject symlinks that could escape the boundary
+        for parent in [candidate, *candidate.parents]:
+            if parent == base:
+                break
+            if parent.is_symlink():
+                return FileResponse(os.path.join(_frontend_dir, "index.html"))
+        if full_path and candidate.is_file():
+            return FileResponse(candidate)
         return FileResponse(os.path.join(_frontend_dir, "index.html"))
 
 

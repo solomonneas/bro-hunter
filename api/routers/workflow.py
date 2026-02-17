@@ -1,9 +1,13 @@
 """
 Workflow Router: PCAP upload-and-analyze pipeline.
 """
-from typing import Optional
-from fastapi import APIRouter, UploadFile, File, HTTPException, Query, Request
+import os
+import shutil
+import tempfile
+from typing import Annotated, Optional
+from fastapi import APIRouter, Depends, UploadFile, File, HTTPException, Query, Request
 
+from api.dependencies.auth import api_key_auth
 from api.middleware.rate_limit import check_rate_limit, record_upload
 
 from api.services.workflow_manager import WorkflowManager
@@ -36,7 +40,7 @@ def _serialize_job(job) -> dict:
 
 
 @router.post("/upload-and-analyze")
-async def upload_and_analyze(request: Request, file: UploadFile = File(...)):
+async def upload_and_analyze(request: Request, file: UploadFile = File(...), _: Annotated[str, Depends(api_key_auth)] = ""):
     """Upload a PCAP file and run the full analysis pipeline."""
     # Rate limit check
     blocked = check_rate_limit(request)
@@ -58,19 +62,30 @@ async def upload_and_analyze(request: Request, file: UploadFile = File(...)):
             detail=f"Invalid file type. Accepted: {', '.join(valid_exts)}"
         )
 
-    # Stream file data with size limit enforcement
+    # Stream file data to temp file with size limit enforcement
     max_size = 100 * 1024 * 1024
-    chunks = []
-    total = 0
-    while True:
-        chunk = await file.read(64 * 1024)
-        if not chunk:
-            break
-        total += len(chunk)
-        if total > max_size:
-            raise HTTPException(status_code=413, detail="File exceeds 100MB limit")
-        chunks.append(chunk)
-    data = b"".join(chunks)
+    tmp = None
+    try:
+        tmp = tempfile.NamedTemporaryFile(delete=False, suffix=".pcap")
+        total = 0
+        while True:
+            chunk = await file.read(64 * 1024)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > max_size:
+                raise HTTPException(status_code=413, detail="File exceeds 100MB limit")
+            tmp.write(chunk)
+        tmp.seek(0)
+        data = tmp.read()
+    finally:
+        if tmp is not None:
+            tmp.close()
+            try:
+                os.unlink(tmp.name)
+            except OSError:
+                pass
+        await file.close()
 
     manager = _get_manager()
     job = manager.create_job(file.filename, data)

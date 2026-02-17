@@ -3,10 +3,12 @@ Scoring Tuner Router - Adjust threat scoring weights and recalculate.
 """
 import json
 import os
-from typing import Optional
+from typing import Annotated, Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+
+from api.dependencies.auth import api_key_auth
 
 from api.services.log_store import LogStore, log_store as _log_store
 from api.services.unified_threat_engine import UnifiedThreatEngine
@@ -68,7 +70,7 @@ async def get_weights():
 
 
 @router.put("/weights")
-async def update_weights(update: WeightsUpdate):
+async def update_weights(update: WeightsUpdate, _: Annotated[str, Depends(api_key_auth)] = ""):
     """Update scoring weights (auto-normalizes to sum to 1.0)."""
     raw = {
         "beacon": update.beacon,
@@ -86,7 +88,7 @@ async def update_weights(update: WeightsUpdate):
 
 
 @router.post("/recalculate")
-async def recalculate_scores():
+async def recalculate_scores(_: Annotated[str, Depends(api_key_auth)] = ""):
     """Re-score all threats with current weights and return top 10 comparison."""
     weights = _load_weights()
 
@@ -136,7 +138,7 @@ async def recalculate_scores():
 
 
 @router.post("/reset")
-async def reset_weights():
+async def reset_weights(_: Annotated[str, Depends(api_key_auth)] = ""):
     """Reset weights to defaults."""
     _save_weights(DEFAULT_WEIGHTS.copy())
     return {

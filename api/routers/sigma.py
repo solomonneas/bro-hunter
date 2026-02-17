@@ -2,7 +2,10 @@
 from __future__ import annotations
 
 import os
-from fastapi import APIRouter, File, HTTPException, UploadFile
+from typing import Annotated
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
+
+from api.dependencies.auth import api_key_auth
 
 from api.services.rule_engine import rule_engine
 from api.services.sigma_converter import convert_sigma_batch, convert_sigma_yaml
@@ -13,7 +16,7 @@ SIGMA_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", 
 
 
 @router.post("/import")
-async def import_sigma(file: UploadFile = File(...)):
+async def import_sigma(file: UploadFile = File(...), _: Annotated[str, Depends(api_key_auth)] = ""):
     if not file.filename:
         raise HTTPException(status_code=400, detail="Missing filename")
     if not file.filename.endswith((".yml", ".yaml")):
@@ -27,7 +30,7 @@ async def import_sigma(file: UploadFile = File(...)):
 
 
 @router.post("/import-batch")
-async def import_sigma_batch(files: list[UploadFile] = File(...)):
+async def import_sigma_batch(files: list[UploadFile] = File(...), _: Annotated[str, Depends(api_key_auth)] = ""):
     sigma_files: list[tuple[str, str]] = []
     for item in files:
         if not item.filename or not item.filename.endswith((".yml", ".yaml")):

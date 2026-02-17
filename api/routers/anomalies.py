@@ -1,6 +1,8 @@
 """Anomaly detection API endpoints."""
-from fastapi import APIRouter, HTTPException, status
+from typing import Annotated
+from fastapi import APIRouter, Depends, HTTPException, status
 
+from api.dependencies.auth import api_key_auth
 from api.services.log_store import log_store
 from api.services.baseline_profiler import BaselineProfiler
 from api.services.anomaly_detector import AnomalyDetector
@@ -12,7 +14,7 @@ _anomaly_detector = AnomalyDetector(log_store, _baseline_profiler)
 
 
 @router.post("/detect")
-async def detect_anomalies():
+async def detect_anomalies(_: Annotated[str, Depends(api_key_auth)] = ""):
     """Run anomaly detection over currently loaded traffic."""
     return _anomaly_detector.detect()
 

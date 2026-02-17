@@ -47,7 +47,7 @@ pip install -r requirements.txt
 python main.py
 ```
 
-Frontend runs on **http://localhost:5186**
+Frontend runs on **http://localhost:5174**
 Backend API on **http://localhost:8000**
 
 ---

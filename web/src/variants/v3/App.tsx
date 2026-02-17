@@ -114,8 +114,8 @@ function buildBreadcrumbs(base: string): Record<string, string> {
   const b = base === '/' ? '' : base;
   const map: Record<string, string> = {};
   map[base] = 'Dashboard';
-  const pages = ['connections', 'beacons', 'dns', 'threats', 'hosts', 'hunts', 'hypotheses', 'timeline', 'sessions', 'packets', 'analytics', 'trends', 'anomalies', 'intel', 'capture', 'reports', 'cases', 'workflow', 'tuning', 'rules', 'settings'];
-  const labels = ['Connections', 'Beacons', 'DNS Threats', 'Threats', 'Host Ranking', 'Hunt Results', 'Hunt Hypotheses', 'Threat Timeline', 'Sessions', 'Packets', 'Analytics', 'Trend Analysis', 'Anomalies', 'Threat Intel', 'Live Capture', 'Reports', 'Cases', 'PCAP Workflow', 'Tuning', 'Rules', 'Settings'];
+  const pages = ['connections', 'beacons', 'dns', 'threats', 'hosts', 'hunts', 'hypotheses', 'timeline', 'sessions', 'packets', 'analytics', 'trends', 'anomalies', 'intel', 'capture', 'reports', 'cases', 'workflow', 'tuning', 'rules', 'tls', 'http', 'lateral', 'webhooks', 'settings'];
+  const labels = ['Connections', 'Beacons', 'DNS Threats', 'Threats', 'Host Ranking', 'Hunt Results', 'Hunt Hypotheses', 'Threat Timeline', 'Sessions', 'Packets', 'Analytics', 'Trend Analysis', 'Anomalies', 'Threat Intel', 'Live Capture', 'Reports', 'Cases', 'PCAP Workflow', 'Tuning', 'Rules', 'TLS Intel', 'HTTP Analysis', 'Lateral Movement', 'Webhooks', 'Settings'];
   pages.forEach((p, i) => { map[`${b}/${p}`] = labels[i]; });
   map[`${b}/hosts`] = 'Host Ranking';
   map[`${b}/hypotheses`] = 'Hunt Hypotheses';

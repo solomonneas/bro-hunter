@@ -3,7 +3,6 @@ HTTP anomaly detection service.
 Detects unusual user-agents, methods, large POSTs, directory traversal, suspicious URIs.
 """
 import random
-import hashlib
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta
 from typing import Optional

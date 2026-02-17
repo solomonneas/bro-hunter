@@ -74,6 +74,7 @@ class TlsAnalyzer:
         for s in target:
             s.reasons = []
             s.mitre = []
+            s.ja3_match = None
             # JA3 match
             if s.ja3 in KNOWN_BAD_SET:
                 match = next(e for e in KNOWN_BAD_JA3 if e["hash"] == s.ja3)

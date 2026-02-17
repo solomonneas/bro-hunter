@@ -3,6 +3,7 @@ Lateral movement detection service.
 Identifies internal-to-internal connections on SMB, RDP, WMI, SSH.
 Flags credential spray patterns and multi-target scanning.
 """
+import ipaddress
 import random
 from dataclasses import dataclass, field, asdict
 from datetime import datetime, timedelta
@@ -169,13 +170,16 @@ class LateralMovementDetector:
         }
 
     def _is_internal(self, ip: str) -> bool:
-        return ip.startswith("10.") or ip.startswith("192.168.") or ip.startswith("172.16.") or ip.startswith("172.17.")
+        try:
+            return ipaddress.ip_address(ip).is_private
+        except ValueError:
+            return False
 
     def generate_demo_data(self) -> list[LateralDetection]:
         now = datetime.now()
         connections = []
         # Attacker doing mass scan
-        for i in range(25):
+        for _ in range(25):
             connections.append({
                 "src_ip": "10.0.1.105",
                 "dst_ip": f"10.0.1.{random.randint(1,254)}",
@@ -183,7 +187,7 @@ class LateralMovementDetector:
                 "ts": (now - timedelta(minutes=random.randint(1, 30))).isoformat(),
             })
         # Moderate lateral movement
-        for i in range(8):
+        for _ in range(8):
             connections.append({
                 "src_ip": "10.0.2.50",
                 "dst_ip": f"10.0.2.{random.choice([10,20,30,40,50])}",
@@ -191,7 +195,7 @@ class LateralMovementDetector:
                 "ts": (now - timedelta(minutes=random.randint(30, 120))).isoformat(),
             })
         # Normal admin
-        for i in range(3):
+        for _ in range(3):
             connections.append({
                 "src_ip": "10.0.1.10",
                 "dst_ip": f"10.0.1.{random.choice([20,21])}",

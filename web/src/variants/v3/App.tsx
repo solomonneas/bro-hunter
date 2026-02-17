@@ -36,6 +36,8 @@ import {
   Server,
   Menu,
   X,
+  ArrowRightLeft,
+  Lock,
 } from 'lucide-react';
 import { format } from 'date-fns';
 import Dashboard from './pages/Dashboard';
@@ -61,6 +63,10 @@ import Workflow from './pages/Workflow';
 import Settings from './pages/Settings';
 import Rules from './pages/Rules';
 import Packets from './pages/Packets';
+import TlsIntel from './pages/TlsIntel';
+import Webhooks from './pages/Webhooks';
+import HttpAnalysisPage from './pages/HttpAnalysisPage';
+import LateralMovementPage from './pages/LateralMovementPage';
 import GlobalSearch from '../../components/GlobalSearch';
 import NotificationToast from '../../components/NotificationToast';
 import './styles.css';
@@ -96,6 +102,10 @@ function buildNav(base: string) {
     { to: `${b}/workflow`, icon: Upload, label: 'PCAP Workflow', end: false },
     { to: `${b}/tuning`, icon: Sliders, label: 'Tuning', end: false },
     { to: `${b}/rules`, icon: Shield, label: 'Rules', end: false },
+    { to: `${b}/tls`, icon: Lock, label: 'TLS Intel', end: false },
+    { to: `${b}/http`, icon: Globe, label: 'HTTP Analysis', end: false },
+    { to: `${b}/lateral`, icon: ArrowRightLeft, label: 'Lateral Movement', end: false },
+    { to: `${b}/webhooks`, icon: Bell, label: 'Webhooks', end: false },
     { to: `${b}/settings`, icon: SettingsIcon, label: 'Settings', end: false },
   ];
 }
@@ -306,6 +316,10 @@ const V3App: React.FC<V3AppProps> = ({ basePath = '/' }) => {
           <Route path="workflow" element={<Workflow />} />
           <Route path="tuning" element={<Tuning />} />
           <Route path="rules" element={<Rules />} />
+          <Route path="tls" element={<TlsIntel />} />
+          <Route path="webhooks" element={<Webhooks />} />
+          <Route path="http" element={<HttpAnalysisPage />} />
+          <Route path="lateral" element={<LateralMovementPage />} />
           <Route path="settings" element={<Settings />} />
           <Route path="*" element={<Navigate to={homeLink} replace />} />
         </Routes>

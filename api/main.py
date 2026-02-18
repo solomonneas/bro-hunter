@@ -10,6 +10,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from api.config import settings
 from api.routers import analysis, logs, ingest, data, hunt, dns_threat, export, sessions, scoring, intel, reports, analytics, capture, workflow, search, packets, baseline, anomalies, cases, bundles, rules, sigma, hosts, hunt_hypotheses, annotations, trends
+from api.routers import tls, webhooks, http_analysis, lateral
 from api.routers import settings as settings_router
 from api.services.log_store import log_store
 from api.services.demo_data import DemoDataService
@@ -126,6 +127,10 @@ app.include_router(annotations.router, prefix=f"{settings.api_prefix}/annotation
 app.include_router(rules.router, prefix=f"{settings.api_prefix}/rules", tags=["rules"])
 app.include_router(sigma.router, prefix=f"{settings.api_prefix}/sigma", tags=["sigma"])
 app.include_router(hosts.router, prefix=f"{settings.api_prefix}/hosts", tags=["hosts"])
+app.include_router(tls.router)
+app.include_router(webhooks.router)
+app.include_router(http_analysis.router)
+app.include_router(lateral.router)
 
 
 ## Demo data loading is handled via lifespan context manager above

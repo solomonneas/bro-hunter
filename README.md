@@ -4,6 +4,7 @@
   <img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
   <img src="https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
   <img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
+  <img src="https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite" />
   <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
 </p>
 
@@ -59,8 +60,9 @@ Backend API on **http://localhost:8000**
 | **Frontend** | React 18 | Interactive dashboards |
 | **Language** | TypeScript 5 | Type safety |
 | **Styling** | Tailwind CSS 3 | Utility-first CSS |
-| **State** | Zustand | Global state management |
-| **Bundler** | Vite 5 | Dev server and build |
+| **Charts** | Recharts | Threat visualization and timeline graphs |
+| **Data** | TanStack Query | Async data fetching and caching |
+| **Bundler** | Vite 7 | Dev server and build |
 | **Backend** | FastAPI | REST API and log processing |
 | **Compute** | Python 3.9+ | Threat scoring algorithms |
 | **Icons** | Lucide React | Consistent icon set |

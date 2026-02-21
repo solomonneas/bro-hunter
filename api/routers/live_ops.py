@@ -64,11 +64,15 @@ class EventsResponse(BaseModel):
 
 
 def _parse_iso_timestamp(ts_str: str) -> Optional[datetime]:
-    """Parse ISO timestamp string to datetime."""
+    """Parse ISO timestamp string to timezone-aware datetime (UTC default)."""
     try:
         # Handle various ISO formats
         ts_str = ts_str.replace('Z', '+00:00')
-        return datetime.fromisoformat(ts_str)
+        parsed = datetime.fromisoformat(ts_str)
+        # Avoid naive/aware comparison errors downstream
+        if parsed.tzinfo is None:
+            parsed = parsed.replace(tzinfo=timezone.utc)
+        return parsed
     except (ValueError, TypeError) as e:
         logger.warning(f"Failed to parse timestamp '{ts_str}': {e}")
         return None

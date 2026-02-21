@@ -21,9 +21,10 @@ Based on commit history, the project has already completed:
 - [ ] MCP server wrapper for agent-native querying
 
 ## Phase 8: Live Operations
+- [x] Dashboard auto-refresh foundation via incremental events endpoint (`/api/v1/live/events`)
+- [x] Live Zeek log ingest endpoint (`/api/v1/live/ingest/zeek`)
+- [x] Suricata EVE streaming ingest endpoint (`/api/v1/live/ingest/suricata`)
 - [ ] Live Zeek log tailing (realtime, not batch)
-- [ ] Suricata EVE streaming ingest
-- [ ] Dashboard auto-refresh with incremental findings
 - [ ] Alert suppression/noise controls
 - [ ] Multi-sensor support
 

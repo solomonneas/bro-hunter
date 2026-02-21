@@ -1,51 +1,76 @@
 # Bro Hunter Roadmap
 
-## Current State (v0.1 - Concept Build)
+## Current State (Reality Check - Feb 21, 2026)
+
+Core platform is much further along than the old roadmap implied.
+
+### Already Built
 - Zeek + Suricata log ingestion
-- Explainable threat scoring engine
-- MITRE ATT&CK technique mapping
-- Beaconing detection (periodicity analysis)
+- PCAP upload and workflow pipeline (`/api/v1/ingest/pcap`, `/api/v1/workflow/upload-and-analyze`)
+- Explainable threat scoring + tuning endpoints/UI
+- MITRE ATT&CK mapping
+- Beaconing detection
 - DNS threat analysis (DGA, tunneling, fast-flux)
-- 5 visual themes
-- Offline log analysis
+- Threat timeline + host risk timeline
+- Session reconstruction (API + UI)
+- IOC export (CSV, STIX, OpenIOC)
+- TLS intelligence (JA3/JA3S + certificate anomaly analysis)
+- HTTP anomaly analysis
+- Lateral movement detection
+- Webhook management (Discord/Slack/generic)
+- PDF report generation
+- Hunt hypotheses
+- Finding annotations
+- Trend analysis
+- Sigma import/conversion
+- Live capture (tcpdump to PCAP)
 
-## Phase 1: Core Hardening
-- [ ] PCAP upload and auto-parse (drag-drop a .pcap, get results)
-- [ ] Threat timeline view (chronological attack narrative)
-- [ ] IOC export (CSV, STIX 2.1, Suricata rules)
-- [ ] Scoring engine tuning UI (adjust weights without touching code)
-- [ ] Session reconstruction (follow a single host through all its connections)
+---
 
-## Phase 2: Detection Expansion
-- [ ] JA3/JA3S fingerprinting (TLS client/server fingerprints)
-- [ ] SSL certificate anomaly detection (self-signed, expired, mismatched CN)
-- [ ] Lateral movement detection (SMB, RDP, WMI patterns across internal hosts)
-- [ ] Data exfiltration scoring (unusual upload volumes, encoding patterns)
-- [ ] HTTP anomaly detection (user-agent analysis, unusual methods, large POSTs)
+## Phase 1: Core Hardening ✅ COMPLETE
+- [x] PCAP upload and auto-parse
+- [x] Threat timeline view
+- [x] IOC export (CSV, STIX 2.1, Suricata rules/OpenIOC)
+- [x] Scoring engine tuning UI
+- [x] Session reconstruction
 
-## Phase 3: Integration
+## Phase 2: Detection Expansion ✅ COMPLETE
+- [x] JA3/JA3S fingerprinting
+- [x] SSL certificate anomaly detection
+- [x] Lateral movement detection
+- [x] Data exfiltration scoring
+- [x] HTTP anomaly detection
+
+## Phase 3: Integration 🚧 IN PROGRESS (STARTED)
 - [ ] MCP server integration (query Bro Hunter from Claude/GPT)
-- [ ] TheHive case creation from findings
+- [x] TheHive case creation from findings/cases (initial API wiring)
 - [ ] Wazuh alert correlation (match network IOCs against host-based alerts)
 - [ ] MISP feed import (enrich findings with known threat intel)
-- [ ] Webhook alerts (Slack, Discord, Telegram on high-severity findings)
+- [x] Webhook alerts (Slack/Discord/generic)
 
 ## Phase 4: Live Operations
 - [ ] Live Zeek log tailing (real-time analysis, not just archived)
 - [ ] Suricata EVE JSON streaming
 - [ ] Dashboard auto-refresh with new findings
-- [ ] Alert suppression rules (reduce noise for known-good traffic)
-- [ ] Multi-sensor support (ingest from multiple Zeek/Suricata instances)
+- [ ] Alert suppression rules
+- [ ] Multi-sensor support
 
-## Phase 5: Reporting
-- [ ] PDF investigation reports (executive summary + technical detail)
-- [ ] Hunt hypothesis templates (structured hunting workflows)
-- [ ] Finding annotations (analyst notes attached to specific events)
-- [ ] Collaborative hunting (multiple analysts, shared findings)
-- [ ] Trend analysis (week-over-week threat landscape for your network)
+## Phase 5: Reporting & Collaboration
+- [x] PDF investigation reports
+- [x] Hunt hypothesis templates
+- [x] Finding annotations
+- [ ] Collaborative hunting (multi-analyst workflows)
+- [x] Trend analysis (week-over-week)
 
 ## Stretch Goals
-- [ ] Sigma rule support (convert Sigma to Suricata/Zeek queries)
+- [x] Sigma rule support
 - [ ] YARA integration for payload inspection
 - [ ] Network topology inference from traffic patterns
-- [ ] Machine learning baseline (normal vs anomalous traffic profiles)
+- [ ] ML baseline (normal vs anomalous profiling at production depth)
+
+---
+
+## Next Up (Immediate)
+1. Wazuh correlation endpoint and matching pipeline
+2. MISP feed import/enrichment
+3. MCP server wrapper for agent-native querying

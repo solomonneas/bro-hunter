@@ -204,6 +204,42 @@ curl -X POST "http://localhost:8000/api/v1/integrations/misp/enrich/case/<case_i
   -H "X-API-Key: $BROHUNTER_API_KEY"
 ```
 
+## Live Operations API (Phase 8)
+
+Real-time log ingestion and incremental event streaming for live dashboards.
+
+### Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/api/v1/live/status` | Get ingest statistics and health status |
+| POST | `/api/v1/live/ingest/zeek` | Ingest Zeek JSON lines (conn, dns) |
+| POST | `/api/v1/live/ingest/suricata` | Ingest Suricata EVE JSON lines |
+| GET | `/api/v1/live/events?since=<iso>&limit=500` | Get incremental events for auto-refresh |
+
+### Example cURL
+
+```bash
+# Check live operations status
+curl -s http://localhost:8000/api/v1/live/status
+
+# Ingest Zeek conn.log events
+curl -X POST "http://localhost:8000/api/v1/live/ingest/zeek?log_type=conn" \
+  -H "X-API-Key: $BROHUNTER_API_KEY" \
+  -H "Content-Type: text/plain" \
+  -d '{"ts":1700000000.0,"uid":"C1","id_orig_h":"10.0.0.1","id_orig_p":12345,"id_resp_h":"192.168.1.1","id_resp_p":80,"proto":"tcp","conn_state":"SF"}'
+
+# Ingest Suricata EVE events
+curl -X POST "http://localhost:8000/api/v1/live/ingest/suricata" \
+  -H "X-API-Key: $BROHUNTER_API_KEY" \
+  -H "Content-Type: text/plain" \
+  -d '{"timestamp":"2024-01-01T00:00:00.000Z","event_type":"alert","src_ip":"10.0.0.1","dest_ip":"192.168.1.1","src_port":12345,"dest_port":80,"proto":"TCP","alert":{"signature":"Test Alert","signature_id":123,"category":"test","severity":3,"action":"allowed"}}'
+
+# Get incremental events since a timestamp (for dashboard auto-refresh)
+curl -s "http://localhost:8000/api/v1/live/events?since=2024-01-01T00:00:00Z&limit=100" \
+  -H "X-API-Key: $BROHUNTER_API_KEY"
+```
+
 ## License
 
 MIT - see [LICENSE](LICENSE) for details.

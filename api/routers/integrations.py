@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from api.dependencies.auth import api_key_auth
 from api.services.case_manager import CaseManager
 from api.services.thehive_client import TheHiveClient, map_brohunter_case_to_thehive
+from api.services.wazuh_client import WazuhClient, normalize_wazuh_hits
 
 router = APIRouter(prefix="/api/v1/integrations", tags=["integrations"])
 
@@ -16,11 +17,17 @@ case_manager = CaseManager()
 @router.get("/status")
 async def integration_status():
     thehive = TheHiveClient()
+    wazuh = WazuhClient()
     return {
         "thehive": {
             "configured": thehive.configured,
             "url": thehive.base_url or None,
-        }
+        },
+        "wazuh": {
+            "configured": wazuh.configured,
+            "url": wazuh.base_url or None,
+            "alerts_path": wazuh.alerts_path,
+        },
     }
 
 
@@ -52,4 +59,72 @@ async def create_thehive_case_from_case(
         "status": "ok",
         "source_case_id": case_id,
         "thehive": result,
+    }
+
+
+@router.post("/wazuh/correlate/case/{case_id}")
+async def correlate_case_iocs_with_wazuh(
+    case_id: str,
+    limit_per_ioc: int = 25,
+    _: Annotated[str, Depends(api_key_auth)] = "",
+):
+    try:
+        case = case_manager.get_case(case_id)
+    except FileNotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e)) from e
+
+    iocs = case.get("iocs", [])
+    if not iocs:
+        return {
+            "status": "ok",
+            "source_case_id": case_id,
+            "summary": {"ioc_count": 0, "matched_iocs": 0, "total_alert_hits": 0},
+            "matches": [],
+        }
+
+    client = WazuhClient()
+    if not client.configured:
+        raise HTTPException(
+            status_code=400,
+            detail="Wazuh integration not configured. Set WAZUH_URL and WAZUH_API_KEY.",
+        )
+
+    matches = []
+    total_hits = 0
+
+    for ioc in iocs:
+        value = str(ioc.get("value", "")).strip()
+        if not value:
+            continue
+
+        try:
+            payload = client.search_alerts_for_ioc(value, limit=limit_per_ioc)
+            hit_count, hit_items = normalize_wazuh_hits(payload)
+        except RuntimeError as e:
+            raise HTTPException(status_code=502, detail=str(e)) from e
+
+        if hit_count > 0:
+            total_hits += hit_count
+            matches.append(
+                {
+                    "ioc": {
+                        "id": ioc.get("id"),
+                        "type": ioc.get("type"),
+                        "value": value,
+                        "verdict": ioc.get("verdict"),
+                    },
+                    "hit_count": hit_count,
+                    "sample_hits": hit_items[:5],
+                }
+            )
+
+    return {
+        "status": "ok",
+        "source_case_id": case_id,
+        "summary": {
+            "ioc_count": len(iocs),
+            "matched_iocs": len(matches),
+            "total_alert_hits": total_hits,
+        },
+        "matches": matches,
     }

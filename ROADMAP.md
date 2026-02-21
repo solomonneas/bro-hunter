@@ -17,7 +17,7 @@ Based on commit history, the project has already completed:
 ## Phase 7: External Integrations (Current)
 - [x] TheHive case export endpoint scaffold (`/api/v1/integrations/thehive/cases/from-case/{case_id}`)
 - [x] Wazuh alert correlation endpoint (case IOC matching against host alerts)
-- [ ] MISP feed import and enrichment
+- [x] MISP IOC enrichment endpoint (case IOC lookups)
 - [ ] MCP server wrapper for agent-native querying
 
 ## Phase 8: Live Operations

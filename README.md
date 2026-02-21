@@ -152,6 +152,58 @@ In Docker / Railway, set these as environment variables in your deployment confi
 
 ---
 
+## Integrations (Phase 7)
+
+Bro Hunter now includes initial external integration endpoints for TheHive, Wazuh, and MISP.
+
+### Environment Variables
+
+Set these on the API service:
+
+```bash
+# TheHive
+THEHIVE_URL=https://thehive.example.com
+THEHIVE_API_KEY=your_thehive_api_key
+THEHIVE_AUTH_SCHEME=Bearer
+
+# Wazuh
+WAZUH_URL=https://wazuh.example.com
+WAZUH_API_KEY=your_wazuh_api_key
+WAZUH_AUTH_SCHEME=Bearer
+WAZUH_ALERTS_PATH=/alerts
+
+# MISP
+MISP_URL=https://misp.example.com
+MISP_API_KEY=your_misp_api_key
+MISP_SEARCH_PATH=/attributes/restSearch
+```
+
+### Endpoints
+
+- `GET /api/v1/integrations/status`
+- `POST /api/v1/integrations/thehive/cases/from-case/{case_id}`
+- `POST /api/v1/integrations/wazuh/correlate/case/{case_id}?limit_per_ioc=25`
+- `POST /api/v1/integrations/misp/enrich/case/{case_id}?limit_per_ioc=25`
+
+### Example cURL
+
+```bash
+# Check integration config status
+curl -s http://localhost:8000/api/v1/integrations/status
+
+# Export a case to TheHive
+curl -X POST "http://localhost:8000/api/v1/integrations/thehive/cases/from-case/<case_id>" \
+  -H "X-API-Key: $BROHUNTER_API_KEY"
+
+# Correlate case IOCs with Wazuh alerts
+curl -X POST "http://localhost:8000/api/v1/integrations/wazuh/correlate/case/<case_id>?limit_per_ioc=25" \
+  -H "X-API-Key: $BROHUNTER_API_KEY"
+
+# Enrich case IOCs from MISP
+curl -X POST "http://localhost:8000/api/v1/integrations/misp/enrich/case/<case_id>?limit_per_ioc=25" \
+  -H "X-API-Key: $BROHUNTER_API_KEY"
+```
+
 ## License
 
 MIT - see [LICENSE](LICENSE) for details.

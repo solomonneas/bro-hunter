@@ -1,51 +1,41 @@
 # Bro Hunter Roadmap
 
-## Current State (v0.1 - Concept Build)
-- Zeek + Suricata log ingestion
-- Explainable threat scoring engine
-- MITRE ATT&CK technique mapping
-- Beaconing detection (periodicity analysis)
-- DNS threat analysis (DGA, tunneling, fast-flux)
-- 5 visual themes
-- Offline log analysis
+## Reality Check (Feb 21, 2026)
+You're right. We are **past Phase 3**.
 
-## Phase 1: Core Hardening
-- [ ] PCAP upload and auto-parse (drag-drop a .pcap, get results)
-- [ ] Threat timeline view (chronological attack narrative)
-- [ ] IOC export (CSV, STIX 2.1, Suricata rules)
-- [ ] Scoring engine tuning UI (adjust weights without touching code)
-- [ ] Session reconstruction (follow a single host through all its connections)
+Based on commit history, the project has already completed:
+- Phase 1A: PCAP Upload + Threat Timeline
+- Phase 1B: IOC Export + Session Reconstruction + Scoring Tuner
+- Phase 2: Threat Intel + Reports + Analytics + Live Capture
+- Phase 3: PCAP Workflow + Settings + Search + Notifications
+- Phase 4A: Packet Inspector + Demo Mode + Dashboard polish
+- Phase 4B: Custom Detection Rules + Sigma Import
+- Phase 4C/4D: Case Management + Add-to-Case flows
+- Phase 5: Reporting + Analyst Workflow + Trends + Host Deep Dive
+- Phase 6: Detection Depth + Integration Polish
 
-## Phase 2: Detection Expansion
-- [ ] JA3/JA3S fingerprinting (TLS client/server fingerprints)
-- [ ] SSL certificate anomaly detection (self-signed, expired, mismatched CN)
-- [ ] Lateral movement detection (SMB, RDP, WMI patterns across internal hosts)
-- [ ] Data exfiltration scoring (unusual upload volumes, encoding patterns)
-- [ ] HTTP anomaly detection (user-agent analysis, unusual methods, large POSTs)
+## Phase 7: External Integrations (Current)
+- [x] TheHive case export endpoint scaffold (`/api/v1/integrations/thehive/cases/from-case/{case_id}`)
+- [x] Wazuh alert correlation endpoint (case IOC matching against host alerts)
+- [x] MISP IOC enrichment endpoint (case IOC lookups)
+- [ ] MCP server wrapper for agent-native querying
 
-## Phase 3: Integration
-- [ ] MCP server integration (query Bro Hunter from Claude/GPT)
-- [ ] TheHive case creation from findings
-- [ ] Wazuh alert correlation (match network IOCs against host-based alerts)
-- [ ] MISP feed import (enrich findings with known threat intel)
-- [ ] Webhook alerts (Slack, Discord, Telegram on high-severity findings)
+## Phase 8: Live Operations
+- [x] Dashboard auto-refresh foundation via incremental events endpoint (`/api/v1/live/events`)
+- [x] Live Zeek log ingest endpoint (`/api/v1/live/ingest/zeek`)
+- [x] Suricata EVE streaming ingest endpoint (`/api/v1/live/ingest/suricata`)
+- [ ] Live Zeek log tailing (realtime, not batch)
+- [ ] Alert suppression/noise controls
+- [ ] Multi-sensor support
 
-## Phase 4: Live Operations
-- [ ] Live Zeek log tailing (real-time analysis, not just archived)
-- [ ] Suricata EVE JSON streaming
-- [ ] Dashboard auto-refresh with new findings
-- [ ] Alert suppression rules (reduce noise for known-good traffic)
-- [ ] Multi-sensor support (ingest from multiple Zeek/Suricata instances)
+## Phase 9: Team Workflow
+- [x] PDF reports
+- [x] Hunt hypotheses
+- [x] Annotations
+- [x] Trend analysis
+- [ ] Collaborative analyst workflow (shared queues/assignment locking)
 
-## Phase 5: Reporting
-- [ ] PDF investigation reports (executive summary + technical detail)
-- [ ] Hunt hypothesis templates (structured hunting workflows)
-- [ ] Finding annotations (analyst notes attached to specific events)
-- [ ] Collaborative hunting (multiple analysts, shared findings)
-- [ ] Trend analysis (week-over-week threat landscape for your network)
-
-## Stretch Goals
-- [ ] Sigma rule support (convert Sigma to Suricata/Zeek queries)
-- [ ] YARA integration for payload inspection
-- [ ] Network topology inference from traffic patterns
-- [ ] Machine learning baseline (normal vs anomalous traffic profiles)
+## Immediate Next Build
+1. Wazuh correlation service + router
+2. MISP enrichment pipeline
+3. MCP wrapper API

@@ -13,8 +13,11 @@ import {
   Cell,
 } from 'recharts';
 import LoadingSkeleton from '../../../components/LoadingSkeleton';
+import LiveIndicator from '../../../components/LiveIndicator';
+import { useLiveRefresh, LiveEvent } from '../../../hooks/useLiveRefresh';
 
 const API_BASE = import.meta.env.VITE_API_BASE || '';
+const IS_DEV = import.meta.env.DEV ?? false;
 
 interface GeoSummary {
   connections: number;
@@ -56,6 +59,14 @@ interface HeatmapRow {
   alerts: number;
 }
 
+interface RecentFinding {
+  id: string;
+  type: 'conn' | 'dns' | 'alert';
+  timestamp: string;
+  description: string;
+  source: string;
+}
+
 const palette = {
   blue: '#2563EB',
   cyan: '#06B6D4',
@@ -82,6 +93,38 @@ const getScorePill = (score: number): React.CSSProperties => {
   return { background: '#F1F5F9', color: '#64748B' };
 };
 
+/**
+ * Convert live events to recent findings for display.
+ */
+function eventsToFindings(events: LiveEvent[]): RecentFinding[] {
+  return events.slice(-20).reverse().map(event => {
+    let description = '';
+    const data = event.data;
+    
+    switch (event.event_type) {
+      case 'conn':
+        description = `${data.src_ip}:${data.src_port} → ${data.dst_ip}:${data.dst_port} (${data.proto})`;
+        break;
+      case 'dns':
+        description = `DNS query: ${data.query || 'unknown'} (${data.qtype || '?'})`;
+        break;
+      case 'alert':
+        description = `Alert: ${data.signature || data.category || 'Security event'}`;
+        break;
+      default:
+        description = `${event.event_type} event from ${event.source}`;
+    }
+    
+    return {
+      id: event.id,
+      type: event.event_type as 'conn' | 'dns' | 'alert',
+      timestamp: event.timestamp,
+      description,
+      source: event.source,
+    };
+  });
+}
+
 const Dashboard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [demoMode, setDemoMode] = useState(false);
@@ -91,6 +134,10 @@ const Dashboard: React.FC = () => {
   const [timeline, setTimeline] = useState<TimelineRow[]>([]);
   const [heatmap, setHeatmap] = useState<HeatmapRow[]>([]);
 
+  // Live refresh hook - default ON in dev mode, OFF in production if API errors
+  const liveRefresh = useLiveRefresh(IS_DEV);
+
+  // Initial data fetch
   useEffect(() => {
     (async () => {
       setLoading(true);
@@ -145,6 +192,9 @@ const Dashboard: React.FC = () => {
     return bins;
   }, [heatmap]);
 
+  // Convert live events to findings
+  const recentFindings = useMemo(() => eventsToFindings(liveRefresh.events), [liveRefresh.events]);
+
   const statCards = [
     { label: 'Total Connections', value: summary?.connections || 0 },
     { label: 'DNS Queries', value: summary?.dns_queries || 0 },
@@ -160,28 +210,43 @@ const Dashboard: React.FC = () => {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div>
-        <h1 className="v3-page-title" style={{ margin: 0, color: 'var(--v3-text)', fontWeight: 700 }}>Security Dashboard</h1>
-        <p className="v3-page-subtitle" style={{ margin: '4px 0 0', color: 'var(--v3-text-secondary)' }}>
-          Live SOC telemetry overview with protocol, traffic, and threat analytics
-        </p>
+      {/* Header with Live Indicator */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
+          <div>
+            <h1 className="v3-page-title" style={{ margin: 0, color: 'var(--v3-text)', fontWeight: 700 }}>Security Dashboard</h1>
+            <p className="v3-page-subtitle" style={{ margin: '4px 0 0', color: 'var(--v3-text-secondary)' }}>
+              Live SOC telemetry overview with protocol, traffic, and threat analytics
+            </p>
+          </div>
+          <LiveIndicator
+            isEnabled={liveRefresh.isEnabled}
+            isLive={liveRefresh.isLive}
+            lastUpdateAt={liveRefresh.lastUpdateAt}
+            lastError={liveRefresh.lastError}
+            consecutiveFailures={liveRefresh.consecutiveFailures}
+            onToggle={liveRefresh.toggle}
+            onResetBackoff={liveRefresh.resetBackoff}
+          />
+        </div>
+
+        {demoMode && (
+          <div
+            style={{
+              background: '#EFF6FF',
+              border: '1px solid #BFDBFE',
+              color: '#1D4ED8',
+              fontSize: 12,
+              borderRadius: 8,
+              padding: '8px 12px',
+            }}
+          >
+            Demo mode is enabled — data is sanitized for safe presentation.
+          </div>
+        )}
       </div>
 
-      {demoMode && (
-        <div
-          style={{
-            background: '#EFF6FF',
-            border: '1px solid #BFDBFE',
-            color: '#1D4ED8',
-            fontSize: 12,
-            borderRadius: 8,
-            padding: '8px 12px',
-          }}
-        >
-          Demo mode is enabled — data is sanitized for safe presentation.
-        </div>
-      )}
-
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3">
         {statCards.map((card) => (
           <div key={card.label} className="v3-stat-card" style={{ ...cardStyle, padding: '14px 16px' }}>
@@ -195,6 +260,7 @@ const Dashboard: React.FC = () => {
         ))}
       </div>
 
+      {/* Charts Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <section style={{ ...cardStyle, padding: 16, minHeight: 320 }}>
           <h3 style={{ margin: 0, marginBottom: 12, color: palette.text, fontSize: 15, fontWeight: 600 }}>Protocol Breakdown</h3>
@@ -227,6 +293,7 @@ const Dashboard: React.FC = () => {
         </section>
       </div>
 
+      {/* Traffic Timeline */}
       <section style={{ ...cardStyle, padding: 16 }}>
         <h3 style={{ margin: 0, marginBottom: 12, color: palette.text, fontSize: 15, fontWeight: 600 }}>Traffic Timeline</h3>
         <ResponsiveContainer width="100%" height={320}>
@@ -241,6 +308,7 @@ const Dashboard: React.FC = () => {
         </ResponsiveContainer>
       </section>
 
+      {/* Threats and Recent Findings Grid */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         <section style={{ ...cardStyle, padding: 16, minHeight: 320 }}>
           <h3 style={{ margin: 0, marginBottom: 12, color: palette.text, fontSize: 15, fontWeight: 600 }}>Threat Score Distribution</h3>
@@ -291,6 +359,63 @@ const Dashboard: React.FC = () => {
           </div>
         </section>
       </div>
+
+      {/* Recent Findings from Live Events */}
+      {recentFindings.length > 0 && (
+        <section style={{ ...cardStyle, padding: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+            <h3 style={{ margin: 0, color: palette.text, fontSize: 15, fontWeight: 600 }}>Recent Live Findings</h3>
+            <span style={{ fontSize: 12, color: '#64748B' }}>{recentFindings.length} events</span>
+          </div>
+
+          <div className="v3-table-wrapper">
+            <table className="v3-table">
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Type</th>
+                  <th>Description</th>
+                  <th>Source</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recentFindings.slice(0, 10).map((finding) => {
+                  const typeColors: Record<string, string> = {
+                    conn: palette.blue,
+                    dns: palette.purple,
+                    alert: palette.red,
+                  };
+                  return (
+                    <tr key={finding.id}>
+                      <td style={{ fontSize: 12, color: '#64748B', whiteSpace: 'nowrap' }}>
+                        {new Date(finding.timestamp).toLocaleTimeString()}
+                      </td>
+                      <td>
+                        <span
+                          style={{
+                            display: 'inline-block',
+                            padding: '2px 8px',
+                            borderRadius: 4,
+                            fontSize: 11,
+                            fontWeight: 600,
+                            textTransform: 'uppercase',
+                            background: typeColors[finding.type] || palette.axis,
+                            color: '#fff',
+                          }}
+                        >
+                          {finding.type}
+                        </span>
+                      </td>
+                      <td style={{ fontSize: 13 }}>{finding.description}</td>
+                      <td style={{ fontSize: 12, color: '#64748B' }}>{finding.source}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

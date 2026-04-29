@@ -1,22 +1,26 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=white" alt="React" />
-  <img src="https://img.shields.io/badge/TypeScript-5-3178C6?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/Python-3.9+-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python" />
-  <img src="https://img.shields.io/badge/FastAPI-0.100+-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI" />
-  <img src="https://img.shields.io/badge/Tailwind_CSS-3-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white" alt="Tailwind CSS" />
-  <img src="https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite&logoColor=white" alt="Vite" />
-  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square" alt="MIT License" />
-
-  <a href="https://solomonneas.dev/projects/bro-hunter"><img src="https://img.shields.io/badge/Portfolio-solomonneas.dev-22c55e?style=flat-square" alt="Portfolio" /></a>
+  <img src="docs/assets/bro-hunter-banner.jpg" alt="Bro Hunter network threat hunting banner">
 </p>
 
-# 🎯 Solomon's Bro Hunter
+<h1 align="center">🎯 Solomon's Bro Hunter</h1>
 
-**Hunt threats in network traffic with explainable scoring and MITRE ATT&CK mapping.**
+<p align="center">
+  <strong>Hunt threats in network traffic with explainable scoring and MITRE ATT&CK mapping.</strong>
+</p>
+
+<p align="center">
+  <img src="https://img.shields.io/badge/React-18.2-61DAFB?style=for-the-badge&logo=react&logoColor=0f172a" alt="React 18.2">
+  <img src="https://img.shields.io/badge/TypeScript-5.3-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 5.3">
+  <img src="https://img.shields.io/badge/Python-3.9%2B-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python 3.9+">
+  <img src="https://img.shields.io/badge/FastAPI-0.109-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI 0.109">
+  <img src="https://img.shields.io/badge/Zeek-logs-0f766e?style=for-the-badge" alt="Zeek logs">
+  <img src="https://img.shields.io/badge/Suricata-EVE-b91c1c?style=for-the-badge" alt="Suricata EVE">
+  <img src="https://img.shields.io/badge/MITRE_ATT%26CK-mapped-f97316?style=for-the-badge" alt="MITRE ATT&CK mapped">
+  <img src="https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge" alt="MIT License">
+  <a href="https://solomonneas.dev/projects/bro-hunter"><img src="https://img.shields.io/badge/Portfolio-solomonneas.dev-22c55e?style=for-the-badge" alt="Portfolio"></a>
+</p>
 
 Bro Hunter is a threat hunting platform that processes Zeek and Suricata network logs to identify threats, score them with explainable AI, and correlate indicators across MITRE ATT&CK techniques. Built for network forensics teams who need to see the evidence.
-
-![Bro Hunter](docs/screenshots/dashboard.png)
 
 ---
 
@@ -166,12 +170,12 @@ Set these on the API service:
 # TheHive
 THEHIVE_URL=https://thehive.example.com
 THEHIVE_API_KEY=your_thehive_api_key
-THEHIVE_AUTH_SCHEME=Bearer
+THEHIVE_AUTH_SCHEME="Bearer"
 
 # Wazuh
 WAZUH_URL=https://wazuh.example.com
 WAZUH_API_KEY=your_wazuh_api_key
-WAZUH_AUTH_SCHEME=Bearer
+WAZUH_AUTH_SCHEME="Bearer"
 WAZUH_ALERTS_PATH=/alerts
 
 # MISP
@@ -229,13 +233,13 @@ curl -s http://localhost:8000/api/v1/live/status
 curl -X POST "http://localhost:8000/api/v1/live/ingest/zeek?log_type=conn" \
   -H "X-API-Key: $BROHUNTER_API_KEY" \
   -H "Content-Type: text/plain" \
-  -d '{"ts":1700000000.0,"uid":"C1","id_orig_h":"10.0.0.1","id_orig_p":12345,"id_resp_h":"192.168.1.1","id_resp_p":80,"proto":"tcp","conn_state":"SF"}'
+  -d '{"ts":1700000000.0,"uid":"C1","id_orig_h":"198.51.100.10","id_orig_p":12345,"id_resp_h":"203.0.113.20","id_resp_p":80,"proto":"tcp","conn_state":"SF"}'
 
 # Ingest Suricata EVE events
 curl -X POST "http://localhost:8000/api/v1/live/ingest/suricata" \
   -H "X-API-Key: $BROHUNTER_API_KEY" \
   -H "Content-Type: text/plain" \
-  -d '{"timestamp":"2024-01-01T00:00:00.000Z","event_type":"alert","src_ip":"10.0.0.1","dest_ip":"192.168.1.1","src_port":12345,"dest_port":80,"proto":"TCP","alert":{"signature":"Test Alert","signature_id":123,"category":"test","severity":3,"action":"allowed"}}'
+  -d '{"timestamp":"2024-01-01T00:00:00.000Z","event_type":"alert","src_ip":"198.51.100.10","dest_ip":"203.0.113.20","src_port":12345,"dest_port":80,"proto":"TCP","alert":{"signature":"Test Alert","signature_id":123,"category":"test","severity":3,"action":"allowed"}}'
 
 # Get incremental events since a timestamp (for dashboard auto-refresh)
 curl -s "http://localhost:8000/api/v1/live/events?since=2024-01-01T00:00:00Z&limit=100" \
